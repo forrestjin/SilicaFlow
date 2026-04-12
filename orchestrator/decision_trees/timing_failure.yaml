@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────────────────────
+# SilicaFlow — Decision Tree: Timing Failure
+# ─────────────────────────────────────────────────────────────
+# Used by the orchestrator to classify and respond to STA failures.
+
+trigger:
+  stage: [sta_pre, sta_post]
+  condition: "report.pass == false"
+
+classification:
+  - check: "WNS < -1.0ns"
+    label: "severe_setup"
+    action: "escalate_to_human"
+    reason: "Large setup violation likely requires RTL or architecture change"
+
+  - check: "WNS >= -1.0ns and WNS < 0"
+    label: "moderate_setup"
+    action: "diagnose_and_propose"
+    skill: "diagnose_timing"
+    possible_fixes:
+      - "Constraint tuning (false paths, multicycle paths)"
+      - "Buffer insertion / fanout optimization"
+      - "Logic restructuring in critical path"
+
+  - check: "WHS < 0"
+    label: "hold_violation"
+    action: "diagnose_and_propose"
+    skill: "diagnose_timing"
+    possible_fixes:
+      - "Hold buffer insertion (tool-automated)"
+      - "Constraint adjustment for hold margin"
+
+  - check: "violating_paths > 100"
+    label: "widespread_timing"
+    action: "escalate_to_human"
+    reason: "Too many violations for incremental fix — likely needs floorplan or architecture change"
+
+response_template: |
+  ## Timing Failure Analysis
+
+  **Stage**: {stage}
+  **WNS**: {wns} | **TNS**: {tns} | **Violations**: {count}
+  **Classification**: {label}
+
+  ### Recommended Action
+  {action_description}
+
+  ### Next Steps
+  {next_steps}

@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────────────────────
+# SilicaFlow — Decision Tree: DRC Failure
+# ─────────────────────────────────────────────────────────────
+
+trigger:
+  stage: [drc]
+  condition: "report.pass == false"
+
+classification:
+  - check: "violations > 1000"
+    label: "massive_drc"
+    action: "escalate_to_human"
+    reason: "Massive DRC count suggests fundamental PnR issue (density, missing rules, wrong tech)"
+
+  - check: "violations > 100"
+    label: "significant_drc"
+    action: "diagnose_and_propose"
+    skill: "diagnose_drc"
+    possible_fixes:
+      - "Reduce TARGET_DENSITY and re-run PnR"
+      - "Add routing blockages in congested areas"
+      - "Increase die area (requires architecture review)"
+
+  - check: "violations <= 100"
+    label: "minor_drc"
+    action: "diagnose_and_propose"
+    skill: "diagnose_drc"
+    possible_fixes:
+      - "ECO-level routing fixes"
+      - "Metal fill adjustments"
+      - "Via enclosure fixes"
+
+  - check: "antenna_violations > 0"
+    label: "antenna_drc"
+    action: "auto_fix"
+    fix_command: "Re-run PnR with antenna diode insertion enabled"

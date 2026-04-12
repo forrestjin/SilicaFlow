@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://silicaflow.dev/schemas/gate_record.schema.json",
+  "title": "SilicaFlow Gate Record",
+  "description": "Audit record for a human milestone gate decision",
+  "type": "object",
+  "required": ["gate", "action", "by", "timestamp"],
+  "properties": {
+    "gate": {
+      "type": "string",
+      "description": "Gate identifier (must match dag.yaml gate key)"
+    },
+    "action": {
+      "type": "string",
+      "enum": ["approve", "reject"]
+    },
+    "by": {
+      "type": "string",
+      "description": "Username or identifier of the approver"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional rationale or conditions"
+    },
+    "stage_reports": {
+      "type": "object",
+      "description": "Snapshot of stage statuses at gate decision time",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "pass": { "type": "boolean" },
+          "summary": { "type": "string" }
+        }
+      }
+    }
+  }
+}

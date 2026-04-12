@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://silicaflow.dev/schemas/flow_state.schema.json",
+  "title": "SilicaFlow Flow State",
+  "description": "Persistent state tracking for the flow DAG execution",
+  "type": "object",
+  "required": ["schema_version", "project", "stages", "gates"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "project": {
+      "type": "string",
+      "description": "Project/design name"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stages": {
+      "type": "object",
+      "description": "Per-stage execution state",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pending", "running", "passed", "failed", "stale", "skipped", "blocked"]
+          },
+          "tool": { "type": "string" },
+          "last_run": { "type": "string", "format": "date-time" },
+          "duration_seconds": { "type": "number" },
+          "input_hashes": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "report_path": { "type": "string" },
+          "pass": { "type": "boolean" },
+          "summary": { "type": "string" },
+          "blocked_by_gate": { "type": "string" }
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "description": "Per-gate approval state",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pending", "approved", "rejected"]
+          },
+          "approved_by": { "type": "string" },
+          "approved_at": { "type": "string", "format": "date-time" },
+          "rejected_by": { "type": "string" },
+          "rejected_at": { "type": "string", "format": "date-time" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

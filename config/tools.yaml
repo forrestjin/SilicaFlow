@@ -1,0 +1,292 @@
+# ─────────────────────────────────────────────────────────────
+# SilicaFlow — Tool Registry
+# ─────────────────────────────────────────────────────────────
+# Each stage lists available tool backends. The active tool is
+# selected by TOOL_<STAGE> in config/project.mk.
+#
+# To add a new tool backend:
+#   1. Add an entry here.
+#   2. Create flow/<phase>/<stage>/<tool_id>/run.sh
+#   3. (Optional) Create scripts/parsers/<stage>_<tool_id>.py
+# ─────────────────────────────────────────────────────────────
+
+stages:
+
+  # ── Frontend ─────────────────────────────────────────────
+  lint:
+    phase: frontend
+    description: "RTL lint / style checks"
+    tools:
+      verible:
+        binary: verible-verilog-lint
+        description: "Google Verible SystemVerilog linter"
+        license: open-source
+        url: "https://github.com/chipsalliance/verible"
+      spyglass_lint:
+        binary: sg_shell
+        description: "Synopsys SpyGlass Lint"
+        license: commercial
+        vendor: synopsys
+      hal:
+        binary: hal
+        description: "Cadence HAL RTL linter"
+        license: commercial
+        vendor: cadence
+      ascent_lint:
+        binary: ascentlint
+        description: "Real Intent Ascent Lint"
+        license: commercial
+        vendor: realintent
+
+  parse:
+    phase: frontend
+    description: "RTL parse / elaboration"
+    tools:
+      surelog:
+        binary: surelog
+        description: "Surelog SystemVerilog parser"
+        license: open-source
+        url: "https://github.com/chipsalliance/Surelog"
+      xcelium_parse:
+        binary: xrun
+        description: "Cadence Xcelium parse/elaborate"
+        license: commercial
+        vendor: cadence
+      vcs_parse:
+        binary: vcs
+        description: "Synopsys VCS parse/elaborate"
+        license: commercial
+        vendor: synopsys
+
+  sim:
+    phase: frontend
+    description: "RTL simulation"
+    tools:
+      verilator:
+        binary: verilator
+        description: "Verilator cycle-accurate simulator"
+        license: open-source
+        url: "https://github.com/verilator/verilator"
+      xcelium:
+        binary: xrun
+        description: "Cadence Xcelium simulator"
+        license: commercial
+        vendor: cadence
+      vcs:
+        binary: vcs
+        description: "Synopsys VCS simulator"
+        license: commercial
+        vendor: synopsys
+      questa:
+        binary: vsim
+        description: "Siemens Questa simulator"
+        license: commercial
+        vendor: siemens
+      iverilog:
+        binary: iverilog
+        description: "Icarus Verilog simulator"
+        license: open-source
+        url: "https://github.com/steveicarus/iverilog"
+
+  formal:
+    phase: frontend
+    description: "Formal property verification"
+    tools:
+      symbiyosys:
+        binary: sby
+        description: "SymbiYosys formal verification framework"
+        license: open-source
+        url: "https://github.com/YosysHQ/sby"
+      jasper:
+        binary: jg
+        description: "Cadence JasperGold formal verification"
+        license: commercial
+        vendor: cadence
+      vc_formal:
+        binary: vcf
+        description: "Synopsys VC Formal"
+        license: commercial
+        vendor: synopsys
+      questa_formal:
+        binary: qformal
+        description: "Siemens Questa Formal"
+        license: commercial
+        vendor: siemens
+
+  cdc:
+    phase: frontend
+    description: "Clock domain crossing analysis"
+    tools:
+      yosys:
+        binary: yosys
+        description: "Yosys-based CDC checks (basic)"
+        license: open-source
+        url: "https://github.com/YosysHQ/yosys"
+      spyglass_cdc:
+        binary: sg_shell
+        description: "Synopsys SpyGlass CDC"
+        license: commercial
+        vendor: synopsys
+      questa_cdc:
+        binary: qcdc
+        description: "Siemens Questa CDC"
+        license: commercial
+        vendor: siemens
+      conformal_cdc:
+        binary: lec
+        description: "Cadence Conformal CDC"
+        license: commercial
+        vendor: cadence
+
+  # ── Synthesis ────────────────────────────────────────────
+  synth:
+    phase: synthesis
+    description: "Logic synthesis"
+    tools:
+      yosys:
+        binary: yosys
+        description: "Yosys open synthesis suite"
+        license: open-source
+        url: "https://github.com/YosysHQ/yosys"
+      genus:
+        binary: genus
+        description: "Cadence Genus synthesis"
+        license: commercial
+        vendor: cadence
+      dc_shell:
+        binary: dc_shell
+        description: "Synopsys Design Compiler"
+        license: commercial
+        vendor: synopsys
+
+  # ── Backend ──────────────────────────────────────────────
+  sta:
+    phase: backend
+    description: "Static timing analysis"
+    tools:
+      opensta:
+        binary: sta
+        description: "OpenSTA timing analyzer"
+        license: open-source
+        url: "https://github.com/The-OpenROAD-Project/OpenSTA"
+      primetime:
+        binary: pt_shell
+        description: "Synopsys PrimeTime"
+        license: commercial
+        vendor: synopsys
+      tempus:
+        binary: tempus
+        description: "Cadence Tempus timing signoff"
+        license: commercial
+        vendor: cadence
+
+  pnr:
+    phase: backend
+    description: "Place and route"
+    tools:
+      openroad:
+        binary: openroad
+        description: "OpenROAD RTL-to-GDS flow"
+        license: open-source
+        url: "https://github.com/The-OpenROAD-Project/OpenROAD"
+      innovus:
+        binary: innovus
+        description: "Cadence Innovus implementation"
+        license: commercial
+        vendor: cadence
+      icc2:
+        binary: icc2_shell
+        description: "Synopsys IC Compiler II"
+        license: commercial
+        vendor: synopsys
+
+  power:
+    phase: backend
+    description: "Power analysis (IR drop, EM, dynamic power)"
+    tools:
+      openroad:
+        binary: openroad
+        description: "OpenROAD power analysis"
+        license: open-source
+        url: "https://github.com/The-OpenROAD-Project/OpenROAD"
+      voltus:
+        binary: voltus
+        description: "Cadence Voltus power integrity"
+        license: commercial
+        vendor: cadence
+      redhawk:
+        binary: redhawk
+        description: "Synopsys RedHawk power integrity"
+        license: commercial
+        vendor: synopsys
+
+  lec:
+    phase: backend
+    description: "Logic equivalence checking"
+    tools:
+      yosys:
+        binary: yosys
+        description: "Yosys equiv_* formal equivalence"
+        license: open-source
+        url: "https://github.com/YosysHQ/yosys"
+      conformal:
+        binary: lec
+        description: "Cadence Conformal LEC"
+        license: commercial
+        vendor: cadence
+      formality:
+        binary: fm_shell
+        description: "Synopsys Formality"
+        license: commercial
+        vendor: synopsys
+
+  # ── Signoff ──────────────────────────────────────────────
+  drc:
+    phase: signoff
+    description: "Design rule checking"
+    tools:
+      klayout:
+        binary: klayout
+        description: "KLayout DRC engine"
+        license: open-source
+        url: "https://www.klayout.de/"
+      calibre_drc:
+        binary: calibre
+        description: "Siemens Calibre DRC"
+        license: commercial
+        vendor: siemens
+      pegasus_drc:
+        binary: pegasus
+        description: "Cadence Pegasus DRC"
+        license: commercial
+        vendor: cadence
+      icv_drc:
+        binary: icv
+        description: "Synopsys IC Validator DRC"
+        license: commercial
+        vendor: synopsys
+
+  lvs:
+    phase: signoff
+    description: "Layout vs. schematic"
+    tools:
+      klayout:
+        binary: klayout
+        description: "KLayout LVS engine"
+        license: open-source
+        url: "https://www.klayout.de/"
+      calibre_lvs:
+        binary: calibre
+        description: "Siemens Calibre LVS"
+        license: commercial
+        vendor: siemens
+      pegasus_lvs:
+        binary: pegasus
+        description: "Cadence Pegasus LVS"
+        license: commercial
+        vendor: cadence
+      icv_lvs:
+        binary: icv
+        description: "Synopsys IC Validator LVS"
+        license: commercial
+        vendor: synopsys

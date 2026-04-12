@@ -1,0 +1,250 @@
+# ─────────────────────────────────────────────────────────────
+# SilicaFlow — Stage Dependency DAG
+# ─────────────────────────────────────────────────────────────
+# This file defines the directed acyclic graph of all flow
+# stages, their dependencies, inputs, outputs, and human-gate
+# requirements.
+#
+# The flow runner (scripts/flow_runner.py) reads this file to
+# determine execution order, detect staleness, and enforce
+# human gates.
+# ─────────────────────────────────────────────────────────────
+
+# ── Human milestone gates ────────────────────────────────────
+# Gates block all downstream stages until approved.
+gates:
+  spec_freeze:
+    description: "Product requirements baselined and testable"
+    checklist: docs/gates/G1_spec_freeze.md
+    blocks: [lint, parse, sim, formal, cdc, synth]
+
+  rtl_freeze:
+    description: "RTL functionally verified — lint, sim, formal, CDC clean"
+    checklist: docs/gates/G2_rtl_freeze.md
+    requires_stages: [lint, parse, sim, formal, cdc]
+    blocks: [synth]
+
+  synth_handoff:
+    description: "Synthesis QoR accepted, LEC clean"
+    checklist: docs/gates/G3_synth_handoff.md
+    requires_stages: [synth, sta_pre, lec]
+    blocks: [pnr]
+
+  tapeout:
+    description: "All signoff checks pass — ready for GDS submission"
+    checklist: docs/gates/G4_tapeout.md
+    requires_stages: [sta_post, drc, lvs, power]
+    blocks: []
+    # Note: tapeout is the final EDA-stage gate. Downstream gates
+    # (package_release, test_signoff) govern non-EDA milestones.
+
+  package_release:
+    description: "Package design and analysis complete"
+    checklist: docs/gates/G5_package_release.md
+    blocks: []
+    # Governs package/ artifacts — no EDA stages to block.
+
+  test_signoff:
+    description: "Silicon validated — ready for production"
+    checklist: docs/gates/G6_test_signoff.md
+    blocks: []
+    # Governs silicon_test/ artifacts — no EDA stages to block.
+
+# ── Stage definitions ────────────────────────────────────────
+# Each stage specifies:
+#   phase:       frontend | synthesis | backend | signoff
+#   depends_on:  list of stages that must pass first
+#   tool_var:    the TOOL_<STAGE> variable from project.mk
+#   inputs:      key input files (for staleness hashing)
+#   outputs:     key output artifacts
+#   report:      path to the structured JSON report
+#   agent:       which agent role owns this stage
+#   gate_after:  optional human gate required before this stage runs
+
+stages:
+
+  # ── Frontend ─────────────────────────────────────────────
+  lint:
+    phase: frontend
+    description: "RTL lint and style checks"
+    depends_on: []
+    gate_after: spec_freeze
+    tool_var: TOOL_LINT
+    agent: design
+    inputs:
+      - "${RTL_FILELIST}"
+      - "${VERIBLE_FLAGS}"
+    outputs:
+      - "${REPORTS_DIR}/lint/report.json"
+    report: "${REPORTS_DIR}/lint/report.json"
+
+  parse:
+    phase: frontend
+    description: "RTL parse and elaboration"
+    depends_on: []
+    gate_after: spec_freeze
+    tool_var: TOOL_PARSE
+    agent: design
+    inputs:
+      - "${RTL_FILELIST}"
+    outputs:
+      - "${REPORTS_DIR}/parse/report.json"
+    report: "${REPORTS_DIR}/parse/report.json"
+
+  sim:
+    phase: frontend
+    description: "RTL simulation"
+    depends_on: [parse]
+    tool_var: TOOL_SIM
+    agent: verification
+    inputs:
+      - "${RTL_FILELIST}"
+      - "${TB_CPP}"
+    outputs:
+      - "${REPORTS_DIR}/sim/report.json"
+    report: "${REPORTS_DIR}/sim/report.json"
+
+  formal:
+    phase: frontend
+    description: "Formal property verification"
+    depends_on: [parse]
+    tool_var: TOOL_FORMAL
+    agent: verification
+    inputs:
+      - "${FORMAL_FILELIST}"
+      - "${SBY_FILE}"
+    outputs:
+      - "${REPORTS_DIR}/formal/report.json"
+    report: "${REPORTS_DIR}/formal/report.json"
+
+  cdc:
+    phase: frontend
+    description: "Clock domain crossing analysis"
+    depends_on: [parse]
+    tool_var: TOOL_CDC
+    agent: verification
+    inputs:
+      - "${RTL_FILELIST}"
+    outputs:
+      - "${REPORTS_DIR}/cdc/report.json"
+    report: "${REPORTS_DIR}/cdc/report.json"
+
+  # ── Synthesis ────────────────────────────────────────────
+  synth:
+    phase: synthesis
+    description: "Logic synthesis"
+    depends_on: [lint, sim, formal, cdc]
+    gate_after: rtl_freeze
+    tool_var: TOOL_SYNTH
+    agent: physical
+    inputs:
+      - "${RTL_FILELIST}"
+      - "${SDC_FILE}"
+      - "${LIBERTY_FILE}"
+    outputs:
+      - "${SYNTH_NETLIST}"
+      - "${REPORTS_DIR}/synth/report.json"
+    report: "${REPORTS_DIR}/synth/report.json"
+
+  # ── Backend ──────────────────────────────────────────────
+  sta_pre:
+    phase: backend
+    description: "Pre-layout static timing analysis"
+    depends_on: [synth]
+    tool_var: TOOL_STA
+    agent: physical
+    inputs:
+      - "${SYNTH_NETLIST}"
+      - "${SDC_FILE}"
+      - "${LIBERTY_FILE}"
+    outputs:
+      - "${REPORTS_DIR}/sta_pre/report.json"
+    report: "${REPORTS_DIR}/sta_pre/report.json"
+
+  lec:
+    phase: backend
+    description: "Logic equivalence checking (RTL vs netlist)"
+    depends_on: [synth]
+    tool_var: TOOL_LEC
+    agent: physical
+    inputs:
+      - "${RTL_FILELIST}"
+      - "${SYNTH_NETLIST}"
+    outputs:
+      - "${REPORTS_DIR}/lec/report.json"
+    report: "${REPORTS_DIR}/lec/report.json"
+
+  pnr:
+    phase: backend
+    description: "Place and route"
+    depends_on: [sta_pre, lec]
+    gate_after: synth_handoff
+    tool_var: TOOL_PNR
+    agent: physical
+    inputs:
+      - "${SYNTH_NETLIST}"
+      - "${SDC_FILE}"
+      - "${LIBERTY_FILE}"
+      - "${LEF_FILE}"
+      - "${TECH_LEF_FILE}"
+    outputs:
+      - "${PNR_DEF}"
+      - "${PNR_GDS}"
+      - "${REPORTS_DIR}/pnr/report.json"
+    report: "${REPORTS_DIR}/pnr/report.json"
+
+  sta_post:
+    phase: backend
+    description: "Post-layout static timing analysis"
+    depends_on: [pnr]
+    tool_var: TOOL_STA
+    agent: physical
+    inputs:
+      - "${SYNTH_NETLIST}"
+      - "${SDC_FILE}"
+      - "${LIBERTY_FILE}"
+      - "${PNR_DEF}"
+    outputs:
+      - "${REPORTS_DIR}/sta_post/report.json"
+    report: "${REPORTS_DIR}/sta_post/report.json"
+
+  power:
+    phase: backend
+    description: "Power analysis (IR drop, EM, dynamic)"
+    depends_on: [pnr]
+    tool_var: TOOL_POWER
+    agent: physical
+    inputs:
+      - "${SYNTH_NETLIST}"
+      - "${SDC_FILE}"
+      - "${LIBERTY_FILE}"
+      - "${PNR_DEF}"
+    outputs:
+      - "${REPORTS_DIR}/power/report.json"
+    report: "${REPORTS_DIR}/power/report.json"
+
+  # ── Signoff ──────────────────────────────────────────────
+  drc:
+    phase: signoff
+    description: "Design rule checking"
+    depends_on: [pnr]
+    tool_var: TOOL_DRC
+    agent: physical
+    inputs:
+      - "${PNR_GDS}"
+    outputs:
+      - "${REPORTS_DIR}/drc/report.json"
+    report: "${REPORTS_DIR}/drc/report.json"
+
+  lvs:
+    phase: signoff
+    description: "Layout vs. schematic"
+    depends_on: [pnr]
+    tool_var: TOOL_LVS
+    agent: physical
+    inputs:
+      - "${PNR_GDS}"
+      - "${SYNTH_NETLIST}"
+    outputs:
+      - "${REPORTS_DIR}/lvs/report.json"
+    report: "${REPORTS_DIR}/lvs/report.json"

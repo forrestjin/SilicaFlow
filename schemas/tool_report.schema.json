@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://silicaflow.dev/schemas/tool_report.schema.json",
+  "title": "SilicaFlow Tool Report",
+  "description": "Universal structured report produced by every EDA tool agent wrapper",
+  "type": "object",
+  "required": ["schema_version", "stage", "tool", "timestamp", "exit_code", "pass", "summary"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version for forward compatibility"
+    },
+    "stage": {
+      "type": "string",
+      "description": "Flow stage name (must match dag.yaml stage key)",
+      "enum": ["lint", "parse", "sim", "formal", "cdc", "synth", "sta_pre", "sta_post", "lec", "pnr", "power", "drc", "lvs"]
+    },
+    "tool": {
+      "type": "string",
+      "description": "Tool identifier (must match tools.yaml tool key)"
+    },
+    "tool_version": {
+      "type": "string",
+      "description": "Tool version string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of report generation"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "description": "Wall-clock execution time in seconds"
+    },
+    "exit_code": {
+      "type": "integer",
+      "description": "Tool process exit code (0=success, 1=fail, 2=error/misconfiguration)"
+    },
+    "pass": {
+      "type": "boolean",
+      "description": "Overall pass/fail determination"
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-line human-readable summary"
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Stage-specific numeric metrics",
+      "additionalProperties": true,
+      "properties": {
+        "errors": { "type": "integer" },
+        "warnings": { "type": "integer" },
+        "info": { "type": "integer" }
+      }
+    },
+    "violations": {
+      "type": "array",
+      "description": "List of individual violations, warnings, or issues",
+      "items": {
+        "type": "object",
+        "required": ["severity", "message"],
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": ["error", "warning", "info"]
+          },
+          "rule": { "type": "string" },
+          "message": { "type": "string" },
+          "file": { "type": "string" },
+          "line": { "type": "integer" },
+          "details": { "type": "string" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "List of output artifact file paths",
+      "items": {
+        "type": "object",
+        "required": ["path", "type"],
+        "properties": {
+          "path": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["netlist", "def", "gds", "sdf", "spef", "log", "report", "database", "other"]
+          },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "input_hashes": {
+      "type": "object",
+      "description": "SHA-256 hashes of input files for staleness detection",
+      "additionalProperties": { "type": "string" }
+    },
+    "raw_log": {
+      "type": "string",
+      "description": "Path to the raw tool log file"
+    }
+  }
+}

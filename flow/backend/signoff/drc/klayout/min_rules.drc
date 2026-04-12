@@ -1,0 +1,6 @@
+source($input)
+report("Minimal DRC", $report)
+
+metal1 = input(1, 0)
+metal1.drc(width < 0.14.um).output("M1_MIN_WIDTH", "Metal1 width below 0.14um")
+metal1.drc(space < 0.14.um).output("M1_MIN_SPACE", "Metal1 spacing below 0.14um")

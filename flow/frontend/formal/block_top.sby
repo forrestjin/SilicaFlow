@@ -1,0 +1,15 @@
+[options]
+mode prove
+depth 20
+
+[engines]
+smtbmc z3
+
+[script]
+read -formal -sv design/rtl/block_top.sv design/formal/block_top_properties.sv
+prep -top block_top_formal
+
+[files]
+design/rtl/block_top.sv
+design/formal/block_top_properties.sv
+
