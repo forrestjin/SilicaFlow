@@ -6,7 +6,7 @@ SilicaFlow is a full-lifecycle ASIC project framework spanning product definitio
 
 | Tier | Role | Examples |
 |------|------|----------|
-| **AI Orchestrator** | Sequences stages, interprets reports, proposes fixes, manages state | Goose / LLM-based controller |
+| **AI Orchestrator** | Sequences stages, interprets reports, proposes fixes, manages state | LLM-based controller (e.g. any AI coding agent) |
 | **EDA Tool Agents** | Execute bounded tasks, produce structured reports | Any tool — open-source or commercial |
 | **Human Gates** | Approve/reject at critical milestones, set policy, override | You, the engineer |
 

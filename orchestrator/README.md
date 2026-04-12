@@ -10,7 +10,7 @@ failures, and pauses at human gates for engineer approval.
 ┌─────────────────────────────────────────────────────────────┐
 │                    AI ORCHESTRATOR                           │
 │                                                             │
-│  recipe.yaml          — Goose recipe for flow orchestration │
+│  recipe.yaml          — AI orchestrator recipe for flow orchestration │
 │  skills/              — Per-stage diagnostic skills          │
 │  decision_trees/      — Per-failure-type decision logic      │
 │                                                             │

@@ -1,12 +1,12 @@
 # ─────────────────────────────────────────────────────────────
 # SilicaFlow — Orchestrator Recipe
 # ─────────────────────────────────────────────────────────────
-# Goose recipe that drives the end-to-end silicon design flow.
+# AI orchestrator recipe that drives the end-to-end silicon design flow.
 # The AI orchestrator sequences stages, interprets reports,
 # proposes fixes, and pauses at human gates.
 #
 # Usage:
-#   goose session --recipe orchestrator/recipe.yaml
+#   <your-ai-agent> --recipe orchestrator/recipe.yaml
 # ─────────────────────────────────────────────────────────────
 
 name: silicaflow-orchestrator

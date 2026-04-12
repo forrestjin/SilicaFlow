@@ -39,7 +39,7 @@ orchestrated flow** with three tiers:
 
 | Tier | Role | Examples |
 |------|------|----------|
-| **AI Orchestrator** | Sequence stages, interpret reports, propose fixes, manage state | Goose / LLM-based controller |
+| **AI Orchestrator** | Sequence stages, interpret reports, propose fixes, manage state | LLM-based controller (any AI coding agent) |
 | **EDA Tool Agents** | Execute bounded tasks, produce structured reports | Verilator, Yosys, OpenROAD, OpenSTA, KLayout, commercial tools |
 | **Human Gates** | Approve/reject at critical milestones, set policy, override | You, the engineer |
 
@@ -201,7 +201,7 @@ Here is a concrete architecture for that:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    AI ORCHESTRATOR (Goose)                   │
+│                      AI ORCHESTRATOR                         │
 │                                                             │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐ │
 │  │  State    │  │  Report  │  │  Decision │  │  Human     │ │
@@ -232,7 +232,7 @@ Here is a concrete architecture for that:
 
 ### 5.1 Three-Tier Responsibilities
 
-**AI Orchestrator (Goose / LLM controller):**
+**AI Orchestrator (LLM-based controller):**
 - Maintains a flow state machine (DAG of stages with dependencies).
 - Invokes EDA tool agents with correct inputs and config.
 - Parses structured reports (JSON/YAML, not just logs).
@@ -341,11 +341,11 @@ Changing an RTL file automatically marks lint → sim → formal → synth → d
 ---
 
 ### Phase 4: AI Orchestrator Integration (Week 9–12)
-> *Connect Goose (or equivalent LLM) as the orchestration brain.*
+> *Connect an LLM-based AI agent as the orchestration brain.*
 
 | # | Task | Priority |
 |---|------|----------|
-| 4.1 | **Create orchestrator prompt/recipe** — a Goose recipe that understands the DAG, can invoke `make <stage>`, parse JSON reports, and decide next actions | 🔴 Critical |
+| 4.1 | **Create orchestrator prompt/recipe** — an AI agent recipe that understands the DAG, can invoke `make <stage>`, parse JSON reports, and decide next actions | 🔴 Critical |
 | 4.2 | **Implement report interpretation** — orchestrator reads `report.json`, classifies results (clean pass / pass-with-warnings / fail-fixable / fail-needs-human), and acts accordingly | 🔴 Critical |
 | 4.3 | **Implement fix-propose-verify loop** — on fixable failures, orchestrator: diagnoses root cause using prompt templates, proposes a fix (patch), presents to human for approval, applies fix, re-runs stage | 🔴 Critical |
 | 4.4 | **Wire prompt templates into the orchestrator** — each template becomes a callable "skill" the orchestrator invokes with structured inputs from the report JSON | 🟡 High |
@@ -450,7 +450,7 @@ SilicaFlow/
 │   └── commercial/               # (existing)
 ├── libs/                         # (existing)
 ├── orchestrator/                 # NEW: AI orchestration layer
-│   ├── recipe.yaml               #   Goose recipe for flow orchestration
+│   ├── recipe.yaml               #   AI orchestrator recipe for flow orchestration
 │   ├── skills/                   #   Per-stage AI skills (wired from prompts/)
 │   │   ├── diagnose_lint.md
 │   │   ├── diagnose_timing.md
@@ -564,7 +564,7 @@ advancing. The AI orchestrator cannot bypass these.
 | # | Question | Needs Decision From |
 |---|----------|---------------------|
 | Q1 | Should the flow runner be a Python script, a Makefile extension, or a dedicated tool (e.g., Snakemake, Nextflow)? | You — tradeoff between simplicity and power |
-| Q2 | Should the AI orchestrator run as a Goose recipe, a standalone agent, or a scheduled job? | You — depends on interaction model (interactive vs. batch) |
+| Q2 | Should the AI orchestrator run as a recipe, a standalone agent, or a scheduled job? | You — depends on interaction model (interactive vs. batch) |
 | Q3 | What is the first non-trivial design to test the flow with? (e.g., PicoRV32, SERV, Ibex) | You — depends on complexity appetite |
 | Q4 | Should commercial tool adapters share the same `run.sh` interface or have a separate adapter layer? | You — depends on licensing and access patterns |
 | Q5 | How should gate approvals be stored long-term? (Git commits? External database? Signed artifacts?) | You — depends on audit/compliance requirements |

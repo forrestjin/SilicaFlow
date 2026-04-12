@@ -29,7 +29,7 @@ Tool classes and current examples:
 - Collaboration and change management: Jira/Confluence or equivalent ALM stack
 - Review/signoff: controlled document workflows and baseline comparison in the chosen ALM
 
-Codex use:
+AI agent use:
 
 - turn draft product text into structured requirements
 - detect ambiguous or untestable requirements
@@ -68,7 +68,7 @@ Tool classes and current examples:
 - Emulation/prototyping for architecture and software bring-up: Cadence Palladium and Protium
 - Interconnect planning: NoC design/exploration tools such as Arteris platforms where applicable
 
-Codex use:
+AI agent use:
 
 - enforce interface consistency across architecture docs
 - extract budgets and assumptions into machine-checkable tables
@@ -146,7 +146,7 @@ Tool classes and current examples:
 - Multi-die/package planning: Cadence Integrity 3D-IC and Synopsys 3DIC/package co-design offerings
 - Analysis: Ansys thermal/SI/PI tools and package-aware signoff/analysis stacks
 
-Codex use:
+AI agent use:
 
 - summarize package-rule changes and SI/PI findings
 - diff bump maps and package constraints across revisions
@@ -184,7 +184,7 @@ Tool classes and current examples:
 - Lab bring-up/debug: JTAG/debug probes, trace/debug tools, scopes, logic analyzers, and protocol analyzers
 - Yield analytics: internal data pipelines plus diagnosis/yield learning tools from the test stack
 
-Codex use:
+AI agent use:
 
 - summarize failing test signatures and group them by suspected logic, package, or process cause
 - compare characterization results across lots, corners, or tester revisions

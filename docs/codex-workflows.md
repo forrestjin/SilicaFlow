@@ -1,6 +1,6 @@
-# SilicaFlow Codex Workflows
+# SilicaFlow AI Agent Workflows
 
-Use Codex on bounded SilicaFlow artifacts, not vague stages.
+Use AI agents on bounded SilicaFlow artifacts, not vague stages.
 
 Good tasks:
 
