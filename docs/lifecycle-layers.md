@@ -96,6 +96,163 @@ Current executable reference stack in this repo:
 - SymbiYosys
 - Yosys
 
+## 3b. Custom Design (Technology, Analog, Manual Layout, Characterization)
+
+Purpose: design, verify, and characterize blocks that fall outside the standard automated digital flow — analog/mixed-signal circuits, custom logic, memory compilers, IO cells, and process-dependent structures — and deliver them as hard macros for digital integration.
+
+This layer runs **in parallel** with the digital front-end (Layer 3). Custom blocks are independently designed, simulated, laid out, verified, extracted, and characterized. Their outputs (Liberty timing models, LEF abstracts, GDS) feed into the digital flow at synthesis and PnR.
+
+### Sub-layers
+
+#### 3b.1 Technology Co-Optimization (DTCO/STCO)
+
+Purpose: explore and lock process options before custom design begins.
+
+Major steps:
+
+1. Define PPA targets from architecture budgets.
+2. Evaluate process options: Vt flavors, metal stack variants, device options.
+3. Run circuit simulation across process options to quantify tradeoffs.
+4. System-Technology Co-Optimization (STCO): evaluate package/board impact on process choices.
+5. Feed results back to architecture for tradeoff decisions.
+6. Lock process options and custom device models.
+
+Typical artifacts:
+
+- process option comparison tables
+- custom device SPICE models (beyond standard PDK)
+- DTCO/STCO tradeoff records with rationale
+- locked process option configuration
+
+#### 3b.2 Custom Schematic Design
+
+Purpose: capture custom block schematics and export simulation-ready netlists.
+
+Major steps:
+
+1. Schematic entry for analog, mixed-signal, memory, IO, and custom logic blocks.
+2. CDL netlist export for LVS.
+3. SPICE netlist export for circuit simulation.
+4. Verilog behavioral model creation for digital integration.
+
+Typical artifacts:
+
+- CDL netlists
+- SPICE netlists
+- Verilog behavioral models
+- schematic review checklists
+
+#### 3b.3 Circuit Simulation
+
+Purpose: verify custom block functionality across process, voltage, and temperature corners.
+
+Major steps:
+
+1. DC operating point and bias verification.
+2. AC frequency response and stability analysis.
+3. Transient time-domain behavior and switching characteristics.
+4. Monte Carlo process variation sensitivity analysis.
+5. Noise analysis (noise figure, phase noise) for analog blocks.
+6. Reliability analysis (HCI, NBTI, EM) for stress-sensitive paths.
+
+Typical artifacts:
+
+- simulation results per corner
+- spec-vs-measured comparison tables
+- Monte Carlo yield estimates
+- corner coverage matrix
+
+#### 3b.4 Custom Layout
+
+Purpose: create physical layout for custom blocks with manual placement and routing.
+
+Major steps:
+
+1. Floorplanning and device placement.
+2. Manual routing of critical paths (matching, shielding, symmetry).
+3. Power grid and guard ring construction.
+4. Density fill and antenna fix.
+5. GDS and LEF abstract export.
+
+Typical artifacts:
+
+- GDS II layout databases
+- LEF abstracts for digital PnR integration
+- layout review checklists
+
+#### 3b.5 Custom Physical Verification (DRC, LVS)
+
+Purpose: verify custom layout against design rules and schematic.
+
+Major steps:
+
+1. DRC against process design rules.
+2. LVS against schematic netlist.
+3. Antenna rule checking.
+4. ERC (electrical rule check) for well ties, substrate contacts.
+
+#### 3b.6 Parasitic Extraction
+
+Purpose: extract parasitics from verified custom layout for post-layout simulation and characterization.
+
+Major steps:
+
+1. RC extraction with process-calibrated rule decks.
+2. Coupling capacitance extraction for cross-talk analysis.
+3. Post-extraction simulation to validate against pre-extraction results.
+
+#### 3b.7 Library Characterization
+
+Purpose: generate Liberty timing/power models from extracted custom blocks.
+
+Major steps:
+
+1. Define characterization templates (timing arcs, slew/load tables, power tables).
+2. Run characterization simulations across PVT corners.
+3. Generate Liberty models (CCS, ECSM, or NLDM format).
+4. Validate Liberty models against golden SPICE simulation.
+5. Deliver .lib files to digital flow for synthesis and STA.
+
+Typical artifacts:
+
+- Liberty (.lib) timing/power models per PVT corner
+- characterization correlation reports (Liberty vs SPICE)
+- model validation summaries
+
+### Tool classes and current examples
+
+| Stage | Open-Source | Commercial |
+|-------|-----------|------------|
+| Schematic entry | xschem | Cadence Virtuoso, Synopsys Custom Compiler |
+| Circuit simulation | ngspice, Xyce | Cadence Spectre, Synopsys HSPICE, Siemens Eldo |
+| Custom layout | Magic VLSI, KLayout | Cadence Virtuoso Layout, Synopsys Custom Compiler, Siemens L-Edit |
+| DRC | Magic | Siemens Calibre, Cadence Pegasus, Synopsys ICV |
+| LVS | Netgen | Siemens Calibre, Cadence Pegasus, Synopsys ICV |
+| Extraction | Magic | Synopsys StarRC, Cadence QRC, Siemens Calibre xRC |
+| Characterization | ngspice (basic) | Cadence Liberate, Synopsys SiliconSmart |
+
+### Current executable reference stack in this repo
+
+- xschem (schematic entry)
+- ngspice (circuit simulation, basic characterization)
+- Magic VLSI (custom layout, DRC, extraction)
+- Netgen (LVS)
+
+### AI agent use
+
+- summarize circuit simulation results across PVT corners and flag out-of-spec metrics
+- classify DRC/LVS violations by severity and propose fixes
+- compare Liberty model timing against SPICE golden reference
+- track DTCO/STCO tradeoff decisions and their impact on downstream stages
+- generate Custom Freeze (G2b) gate readiness summaries
+- diff custom block revisions and assess impact on digital integration
+
+### Human gate
+
+**G2b: Custom Freeze** — blocks digital synthesis until all custom blocks are DRC/LVS clean,
+circuit simulation passes across corners, and characterized Liberty models are validated.
+See `docs/gates/G2b_custom_freeze.md` for the full checklist.
+
 ## 4. Back-End Implementation And Signoff
 
 Purpose: convert validated RTL into a physically realizable design that meets timing, power, area, signal integrity, and signoff criteria.

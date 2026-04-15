@@ -74,25 +74,45 @@ instructions: |
   - CDC failures → `prompts/cdc_review.md`
   - LEC failures → `prompts/lec_review.md`
   - Power issues → `prompts/power_review.md`
+  - Custom design failures → `prompts/custom_review.md`
   - DRC/LVS failures → `prompts/report_diff.md` (for regression analysis)
   - Post-silicon failures → `prompts/silicon_test_debug.md`
 
   ## Stage DAG (reference)
 
   ```
-  lint ──┐
-  parse ─┤── sim ──┐
-         ├── formal┤
-         └── cdc ──┤
-                   └── synth ── sta_pre ──┐
-                                lec ──────┤
-                                          └── pnr ── sta_post
-                                               ├──── power
-                                               ├──── drc
-                                               └──── lvs
+                      ┌── DIGITAL FRONTEND ──┐
+                      │                      │
+  lint ──┐            │ schematic_entry ──┐  │
+  parse ─┤── sim ──┐  │   ├── circuit_sim │  │
+         ├── formal┤  │   └── custom_layout  │
+         └── cdc ──┤  │        ├── custom_drc│
+                   │  │        └── layout_vs_sch
+                   │  │             └── extraction
+                   │  │                  └── char ─┐
+                   │  │    CUSTOM DESIGN ──────────┘
+                   │  │                             │
+                   └──┴── synth ── sta_pre ──┐      │
+                                  lec ───────┤
+                                             └── pnr ── sta_post
+                                                  ├──── power
+                                                  ├──── drc
+                                                  └──── lvs
   ```
 
-  Human Gates: spec_freeze → rtl_freeze → synth_handoff → tapeout → package_release → test_signoff
+  Human Gates: spec_freeze → rtl_freeze → custom_freeze → synth_handoff → tapeout → package_release → test_signoff
+
+  ## Custom Design Flow
+
+  Custom blocks (analog, memory, IO, custom logic) run in parallel with the digital frontend.
+  They have their own sub-DAG:
+  
+  schematic_entry → circuit_sim → extraction → char
+  schematic_entry → custom_layout → custom_drc → extraction
+  schematic_entry → custom_layout → layout_vs_sch → extraction
+  
+  The **Custom Freeze (G2b)** gate must be approved before synthesis can use custom Liberty models.
+  Use `prompts/custom_review.md` and `orchestrator/skills/diagnose_custom.md` for custom failures.
 
 extensions:
   - developer

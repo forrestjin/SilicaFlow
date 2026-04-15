@@ -28,6 +28,7 @@ mkdir -p "$GATE_STATE_DIR"
 VALID_GATES=(
   spec_freeze
   rtl_freeze
+  custom_freeze
   synth_handoff
   tapeout
   package_release

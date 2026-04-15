@@ -53,6 +53,7 @@ make approve GATE=rtl_freeze   # Approve a gate
 1. **Product specification** — requirements, compliance, acceptance criteria
 2. **Architecture design** — PPA budgets, interface contracts, tradeoff studies
 3. **Front-end design & verification** — RTL, lint, simulation, formal, CDC
+3b. **Custom design** — DTCO/STCO, analog/custom schematic, manual layout, circuit sim, extraction, library characterization
 4. **Synthesis & back-end implementation** — synthesis, STA, LEC, PnR, power
 5. **Physical signoff** — DRC, LVS, timing closure
 6. **Package realization** — bump map, substrate, SI/PI/thermal, OSAT handoff
@@ -61,21 +62,29 @@ make approve GATE=rtl_freeze   # Approve a gate
 ## Flow Stages (DAG)
 
 ```
-lint ──┐
-parse ─┤── sim ──┐
-       ├── formal┤
-       └── cdc ──┤
-                 └── synth ── sta_pre ──┐
-                              lec ──────┤
-                                        └── pnr ── sta_post
-                                             ├──── power
-                                             ├──── drc
-                                             └──── lvs
+                    ┌─── DIGITAL FRONTEND ───┐
+                    │                        │
+lint ──┐            │ schematic_entry ──┐    │
+parse ─┤── sim ──┐  │   ├── circuit_sim │    │
+       ├── formal┤  │   └── custom_layout   │
+       └── cdc ──┤  │        ├── custom_drc │
+                 │  │        └── layout_vs_sch
+                 │  │             └── extraction
+                 │  │                  └── char ─┐
+                 │  │    CUSTOM DESIGN ──────────┘
+                 │  │                             │
+                 └──┴── synth ── sta_pre ──┐      │
+                              lec ─────────┤
+                                           └── pnr ── sta_post
+                                                ├──── power
+                                                ├──── drc
+                                                └──── lvs
 ```
 
 **Human Gates** (🔒 = flow pauses for approval):
-- 🔒 **G1: Spec Freeze** — before frontend stages
+- 🔒 **G1: Spec Freeze** — before frontend and custom stages
 - 🔒 **G2: RTL Freeze** — before synthesis
+- 🔒 **G2b: Custom Freeze** — before custom blocks integrate into synthesis
 - 🔒 **G3: Synth Handoff** — before PnR
 - 🔒 **G4: Tapeout** — before GDS submission
 - 🔒 **G5: Package Release** — before OSAT handoff
@@ -85,7 +94,7 @@ parse ─┤── sim ──┐
 
 ```
 SilicaFlow/
-├── agents/roles/        8 agent role definitions with handoff protocols
+├── agents/roles/        9 agent role definitions with handoff protocols
 ├── architecture/        workloads, budgets, interfaces, tradeoffs, models
 ├── config/
 │   ├── project.mk       project configuration (all ?= overridable)
@@ -97,8 +106,14 @@ SilicaFlow/
 │   ├── constraints/     SDC timing constraints
 │   ├── filelists/       source manifests
 │   └── upf/             power intent
+├── custom/
+│   ├── technology/      DTCO/STCO configs, process options, device models
+│   ├── schematic/       custom block schematics (CDL, SPICE, Verilog)
+│   ├── layout/          custom layout (GDS, LEF, Magic .mag)
+│   ├── simulation/      SPICE testbenches, PVT corner definitions
+│   └── characterization/ Liberty model generation, extraction configs
 ├── docs/
-│   ├── gates/           6 gate review checklists
+│   ├── gates/           7 gate review checklists (G1–G6 + G2b)
 │   ├── flow.md          flow methodology overview
 │   ├── lifecycle-layers.md  detailed lifecycle documentation
 │   └── toolchain-matrix.md  tool capabilities matrix
@@ -109,6 +124,9 @@ SilicaFlow/
 │   │   └── <stage>/
 │   │       ├── run.sh           tool-agnostic dispatcher
 │   │       └── <tool>/run.sh   tool-specific implementation
+│   ├── custom/          schematic_entry, circuit_sim, custom_layout,
+│   │                    custom_drc, layout_vs_sch, extraction, char
+│   │   └── <stage>/<tool>/run.sh
 │   ├── backend/         sta, pnr, lec, power
 │   │   └── <stage>/<tool>/run.sh
 │   └── commercial/      adapter slots for Synopsys, Cadence, Siemens

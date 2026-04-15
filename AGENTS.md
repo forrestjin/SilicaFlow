@@ -31,6 +31,7 @@ and defer to human engineers at milestone gates.
 | Design | lint, parse | `design/rtl/`, `design/constraints/` | [agents/roles/design.md](agents/roles/design.md) |
 | Verification | sim, formal, cdc | `design/tb/`, `design/formal/` | [agents/roles/verification.md](agents/roles/verification.md) |
 | CAD | — (infrastructure) | `flow/`, `scripts/`, `config/`, `schemas/` | [agents/roles/cad.md](agents/roles/cad.md) |
+| Custom | schematic_entry, circuit_sim, custom_layout, custom_drc, layout_vs_sch, extraction, char | `custom/` | [agents/roles/custom.md](agents/roles/custom.md) |
 | Physical | synth, sta, lec, pnr, power, drc, lvs | `work/synth/`, `work/pnr/` | [agents/roles/physical.md](agents/roles/physical.md) |
 | Package | — | `package/` | [agents/roles/package.md](agents/roles/package.md) |
 | Silicon Test | — | `silicon_test/` | [agents/roles/test.md](agents/roles/test.md) |
@@ -43,6 +44,7 @@ These gates **block all downstream stages** until the human engineer approves.
 |------|----------|-----------|
 | 🔒 G1: spec_freeze | Are we building the right thing? | [G1](docs/gates/G1_spec_freeze.md) |
 | 🔒 G2: rtl_freeze | Is the design functionally correct? | [G2](docs/gates/G2_rtl_freeze.md) |
+| 🔒 G2b: custom_freeze | Are custom blocks verified and characterized? | [G2b](docs/gates/G2b_custom_freeze.md) |
 | 🔒 G3: synth_handoff | Are we on PPA budget? | [G3](docs/gates/G3_synth_handoff.md) |
 | 🔒 G4: tapeout | Is this ready for fabrication? | [G4](docs/gates/G4_tapeout.md) |
 | 🔒 G5: package_release | Is the package integration sound? | [G5](docs/gates/G5_package_release.md) |

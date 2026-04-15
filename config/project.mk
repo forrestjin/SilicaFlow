@@ -49,6 +49,21 @@ SYNTH_NETLIST  ?= $(WORK_DIR)/synth/$(TOP)_netlist.v
 PNR_DEF        ?= $(WORK_DIR)/pnr/$(TOP).def
 PNR_GDS        ?= $(WORK_DIR)/pnr/$(TOP).gds
 
+# ── Custom design ─────────────────────────────────────────────
+CUSTOM_DIR     ?= $(ROOT_DIR)/custom
+CUSTOM_SCHEMATIC_DIR ?= $(CUSTOM_DIR)/schematic
+CUSTOM_LAYOUT_DIR    ?= $(CUSTOM_DIR)/layout
+CUSTOM_SIM_DIR       ?= $(CUSTOM_DIR)/simulation
+CUSTOM_CHAR_DIR      ?= $(CUSTOM_DIR)/characterization
+CUSTOM_TECH_DIR      ?= $(CUSTOM_DIR)/technology
+
+# Custom block Liberty models (space-separated, merged into synthesis)
+CUSTOM_LIBERTY_FILES ?=
+# Custom block LEF abstracts (space-separated, merged into PnR)
+CUSTOM_LEF_FILES     ?=
+# Custom block GDS (space-separated, merged into final GDS)
+CUSTOM_GDS_FILES     ?=
+
 # ── Tool selection (overrides which backend is used per stage)
 # Valid values are tool directory names under flow/<phase>/<stage>/
 # e.g. TOOL_LINT=verible, TOOL_SIM=verilator, TOOL_SYNTH=yosys
@@ -65,6 +80,13 @@ TOOL_DRC       ?= klayout
 TOOL_LVS       ?= klayout
 TOOL_LEC       ?= yosys
 TOOL_POWER     ?= openroad
+TOOL_SCHEMATIC ?= xschem
+TOOL_CIRCUIT_SIM ?= ngspice
+TOOL_CUSTOM_LAYOUT ?= magic
+TOOL_CUSTOM_DRC ?= magic
+TOOL_CUSTOM_LVS ?= netgen
+TOOL_EXTRACTION ?= magic
+TOOL_CHAR      ?= ngspice
 
 # ── Stage-specific config files ──────────────────────────────
 VERIBLE_FLAGS  ?= $(ROOT_DIR)/flow/frontend/lint/flags/verible.flags

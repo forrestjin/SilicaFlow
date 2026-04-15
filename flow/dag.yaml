@@ -30,6 +30,14 @@ gates:
     requires_stages: [synth, sta_pre, lec]
     blocks: [pnr]
 
+  custom_freeze:
+    description: "All custom blocks DRC/LVS clean, characterized, Liberty models validated"
+    checklist: docs/gates/G2b_custom_freeze.md
+    requires_stages: [custom_drc, layout_vs_sch, char]
+    blocks: [synth]
+    # Custom blocks must be frozen before they can be integrated
+    # into the digital synthesis/PnR flow as hard macros.
+
   tapeout:
     description: "All signoff checks pass — ready for GDS submission"
     checklist: docs/gates/G4_tapeout.md
@@ -129,12 +137,109 @@ stages:
       - "${REPORTS_DIR}/cdc/report.json"
     report: "${REPORTS_DIR}/cdc/report.json"
 
+  # ── Custom ─────────────────────────────────────────────
+  # Custom design runs in parallel with the digital frontend.
+  # Custom blocks are designed, simulated, laid out, verified,
+  # extracted, and characterized independently. The outputs
+  # (Liberty models, LEF abstracts, GDS) feed into the digital
+  # flow at synthesis and PnR.
+
+  schematic_entry:
+    phase: custom
+    description: "Schematic capture for custom/analog blocks"
+    depends_on: []
+    gate_after: spec_freeze
+    tool_var: TOOL_SCHEMATIC
+    agent: custom
+    inputs:
+      - "custom/schematic/"
+    outputs:
+      - "${REPORTS_DIR}/schematic_entry/report.json"
+    report: "${REPORTS_DIR}/schematic_entry/report.json"
+
+  circuit_sim:
+    phase: custom
+    description: "SPICE-level circuit simulation"
+    depends_on: [schematic_entry]
+    tool_var: TOOL_CIRCUIT_SIM
+    agent: custom
+    inputs:
+      - "custom/simulation/testbenches/"
+      - "custom/simulation/corners/"
+    outputs:
+      - "${REPORTS_DIR}/circuit_sim/report.json"
+    report: "${REPORTS_DIR}/circuit_sim/report.json"
+
+  custom_layout:
+    phase: custom
+    description: "Custom/analog layout (manual placement and routing)"
+    depends_on: [schematic_entry]
+    tool_var: TOOL_CUSTOM_LAYOUT
+    agent: custom
+    inputs:
+      - "custom/layout/"
+    outputs:
+      - "${REPORTS_DIR}/custom_layout/report.json"
+    report: "${REPORTS_DIR}/custom_layout/report.json"
+
+  custom_drc:
+    phase: custom
+    description: "DRC for custom/analog layout blocks"
+    depends_on: [custom_layout]
+    tool_var: TOOL_CUSTOM_DRC
+    agent: custom
+    inputs:
+      - "custom/layout/"
+    outputs:
+      - "${REPORTS_DIR}/custom_drc/report.json"
+    report: "${REPORTS_DIR}/custom_drc/report.json"
+
+  layout_vs_sch:
+    phase: custom
+    description: "LVS for custom/analog blocks"
+    depends_on: [custom_layout, schematic_entry]
+    tool_var: TOOL_CUSTOM_LVS
+    agent: custom
+    inputs:
+      - "custom/layout/"
+      - "custom/schematic/"
+    outputs:
+      - "${REPORTS_DIR}/layout_vs_sch/report.json"
+    report: "${REPORTS_DIR}/layout_vs_sch/report.json"
+
+  extraction:
+    phase: custom
+    description: "Parasitic extraction from custom layout"
+    depends_on: [custom_drc, layout_vs_sch]
+    tool_var: TOOL_EXTRACTION
+    agent: custom
+    inputs:
+      - "custom/layout/"
+    outputs:
+      - "${REPORTS_DIR}/extraction/report.json"
+    report: "${REPORTS_DIR}/extraction/report.json"
+
+  char:
+    phase: custom
+    description: "Library characterization (Liberty model generation)"
+    depends_on: [extraction, circuit_sim]
+    tool_var: TOOL_CHAR
+    agent: custom
+    inputs:
+      - "custom/characterization/templates/"
+    outputs:
+      - "${REPORTS_DIR}/char/report.json"
+    report: "${REPORTS_DIR}/char/report.json"
+
   # ── Synthesis ────────────────────────────────────────────
   synth:
     phase: synthesis
     description: "Logic synthesis"
-    depends_on: [lint, sim, formal, cdc]
+    depends_on: [lint, sim, formal, cdc, char]
     gate_after: rtl_freeze
+    # Note: synth depends on char because custom block Liberty models
+    # must be available for synthesis to instantiate hard macros.
+    # Both rtl_freeze AND custom_freeze gates must be approved.
     tool_var: TOOL_SYNTH
     agent: physical
     inputs:

@@ -55,6 +55,17 @@ export SBY_FILE
 export GATES_ENABLED
 export GATE_STATE_DIR
 
+# Custom design exports
+export CUSTOM_DIR
+export CUSTOM_SCHEMATIC_DIR
+export CUSTOM_LAYOUT_DIR
+export CUSTOM_SIM_DIR
+export CUSTOM_CHAR_DIR
+export CUSTOM_TECH_DIR
+export CUSTOM_LIBERTY_FILES
+export CUSTOM_LEF_FILES
+export CUSTOM_GDS_FILES
+
 # Tool selection exports
 export TOOL_LINT
 export TOOL_PARSE
@@ -68,6 +79,13 @@ export TOOL_POWER
 export TOOL_LEC
 export TOOL_DRC
 export TOOL_LVS
+export TOOL_SCHEMATIC
+export TOOL_CIRCUIT_SIM
+export TOOL_CUSTOM_LAYOUT
+export TOOL_CUSTOM_DRC
+export TOOL_CUSTOM_LVS
+export TOOL_EXTRACTION
+export TOOL_CHAR
 
 # ── Phony targets ────────────────────────────────────────────
 .PHONY: help env status \
@@ -75,7 +93,9 @@ export TOOL_LVS
         synth \
         sta_pre lec pnr sta_post power \
         drc lvs \
-        frontend backend signoff all \
+        schematic_entry circuit_sim custom_layout custom_drc \
+        layout_vs_sch extraction char \
+        frontend custom backend signoff all \
         approve reject gates reset \
         orchestrate run-next stale dot \
         clean clean-reports clean-all
@@ -101,6 +121,16 @@ help:
 		"   make formal         Formal verification($(TOOL_FORMAL))" \
 		"   make cdc            CDC analysis       ($(TOOL_CDC))" \
 		"   make frontend       all frontend stages" \
+		"" \
+		" Custom design stages:" \
+		"   make schematic_entry Schematic capture ($(TOOL_SCHEMATIC))" \
+		"   make circuit_sim    Circuit simulation ($(TOOL_CIRCUIT_SIM))" \
+		"   make custom_layout  Custom layout      ($(TOOL_CUSTOM_LAYOUT))" \
+		"   make custom_drc     Custom DRC         ($(TOOL_CUSTOM_DRC))" \
+		"   make layout_vs_sch  Custom LVS         ($(TOOL_CUSTOM_LVS))" \
+		"   make extraction     Parasitic extract  ($(TOOL_EXTRACTION))" \
+		"   make char           Lib characterize   ($(TOOL_CHAR))" \
+		"   make custom         all custom stages" \
 		"" \
 		" Synthesis:" \
 		"   make synth          Logic synthesis    ($(TOOL_SYNTH))" \
@@ -172,8 +202,33 @@ cdc: parse
 
 frontend: lint parse sim formal cdc
 
+# -- Custom design stages ------------------------------------------
+schematic_entry:
+	@bash flow/custom/schematic_entry/run.sh
+
+circuit_sim: schematic_entry
+	@bash flow/custom/circuit_sim/run.sh
+
+custom_layout: schematic_entry
+	@bash flow/custom/custom_layout/run.sh
+
+custom_drc: custom_layout
+	@bash flow/custom/custom_drc/run.sh
+
+layout_vs_sch: custom_layout schematic_entry
+	@bash flow/custom/layout_vs_sch/run.sh
+
+extraction: custom_drc layout_vs_sch
+	@bash flow/custom/extraction/run.sh
+
+char: extraction circuit_sim
+	@bash flow/custom/char/run.sh
+
+custom: schematic_entry circuit_sim custom_layout custom_drc layout_vs_sch extraction char
+
+
 # ── Synthesis ────────────────────────────────────────────────
-synth: lint sim formal cdc
+synth: lint sim formal cdc char
 	@bash flow/frontend/synth/run.sh
 
 # ── Backend stages ───────────────────────────────────────────
@@ -204,7 +259,7 @@ lvs: pnr
 signoff: drc lvs
 
 # ── Full flow ────────────────────────────────────────────────
-all: frontend synth backend signoff
+all: frontend custom synth backend signoff
 
 run-next:
 	@python3 scripts/flow_runner.py run

@@ -240,6 +240,182 @@ stages:
         license: commercial
         vendor: synopsys
 
+  # ── Custom ───────────────────────────────────────────────
+  schematic_entry:
+    phase: custom
+    description: "Schematic capture for custom/analog blocks"
+    tools:
+      xschem:
+        binary: xschem
+        description: "Xschem open-source schematic editor"
+        license: open-source
+        url: "https://xschem.sourceforge.io/"
+      virtuoso_sch:
+        binary: virtuoso
+        description: "Cadence Virtuoso Schematic Editor"
+        license: commercial
+        vendor: cadence
+      s_edit:
+        binary: s_edit
+        description: "Synopsys Custom Compiler S-Edit"
+        license: commercial
+        vendor: synopsys
+
+  circuit_sim:
+    phase: custom
+    description: "SPICE-level circuit simulation"
+    tools:
+      ngspice:
+        binary: ngspice
+        description: "ngspice open-source SPICE simulator"
+        license: open-source
+        url: "https://ngspice.sourceforge.io/"
+      xyce:
+        binary: Xyce
+        description: "Sandia Xyce parallel SPICE simulator"
+        license: open-source
+        url: "https://xyce.sandia.gov/"
+      spectre:
+        binary: spectre
+        description: "Cadence Spectre circuit simulator"
+        license: commercial
+        vendor: cadence
+      hspice:
+        binary: hspice
+        description: "Synopsys HSPICE circuit simulator"
+        license: commercial
+        vendor: synopsys
+      eldo:
+        binary: eldo
+        description: "Siemens Eldo circuit simulator"
+        license: commercial
+        vendor: siemens
+
+  custom_layout:
+    phase: custom
+    description: "Custom/analog layout (manual placement and routing)"
+    tools:
+      magic:
+        binary: magic
+        description: "Magic VLSI layout editor"
+        license: open-source
+        url: "https://github.com/RTimothyEdwards/magic"
+      klayout_edit:
+        binary: klayout
+        description: "KLayout layout editor (edit mode)"
+        license: open-source
+        url: "https://www.klayout.de/"
+      virtuoso_layout:
+        binary: virtuoso
+        description: "Cadence Virtuoso Layout Suite"
+        license: commercial
+        vendor: cadence
+      custom_compiler:
+        binary: custom_compiler
+        description: "Synopsys Custom Compiler layout"
+        license: commercial
+        vendor: synopsys
+      l_edit:
+        binary: l_edit
+        description: "Siemens L-Edit layout editor"
+        license: commercial
+        vendor: siemens
+
+  custom_drc:
+    phase: custom
+    description: "DRC for custom/analog layout blocks"
+    tools:
+      magic:
+        binary: magic
+        description: "Magic built-in DRC engine"
+        license: open-source
+        url: "https://github.com/RTimothyEdwards/magic"
+      calibre_drc:
+        binary: calibre
+        description: "Siemens Calibre DRC"
+        license: commercial
+        vendor: siemens
+      pegasus_drc:
+        binary: pegasus
+        description: "Cadence Pegasus DRC"
+        license: commercial
+        vendor: cadence
+      icv_drc:
+        binary: icv
+        description: "Synopsys IC Validator DRC"
+        license: commercial
+        vendor: synopsys
+
+  layout_vs_sch:
+    phase: custom
+    description: "LVS for custom/analog blocks"
+    tools:
+      netgen:
+        binary: netgen
+        description: "Netgen open-source LVS"
+        license: open-source
+        url: "https://github.com/RTimothyEdwards/netgen"
+      calibre_lvs:
+        binary: calibre
+        description: "Siemens Calibre LVS"
+        license: commercial
+        vendor: siemens
+      pegasus_lvs:
+        binary: pegasus
+        description: "Cadence Pegasus LVS"
+        license: commercial
+        vendor: cadence
+      icv_lvs:
+        binary: icv
+        description: "Synopsys IC Validator LVS"
+        license: commercial
+        vendor: synopsys
+
+  extraction:
+    phase: custom
+    description: "Parasitic extraction from custom layout"
+    tools:
+      magic:
+        binary: magic
+        description: "Magic parasitic extraction"
+        license: open-source
+        url: "https://github.com/RTimothyEdwards/magic"
+      starrc:
+        binary: StarXtract
+        description: "Synopsys StarRC parasitic extraction"
+        license: commercial
+        vendor: synopsys
+      qrc:
+        binary: qrc
+        description: "Cadence Quantus QRC extraction"
+        license: commercial
+        vendor: cadence
+      calibre_xrc:
+        binary: calibre
+        description: "Siemens Calibre xRC extraction"
+        license: commercial
+        vendor: siemens
+
+  char:
+    phase: custom
+    description: "Library characterization (Liberty model generation)"
+    tools:
+      ngspice:
+        binary: ngspice
+        description: "ngspice-based basic characterization"
+        license: open-source
+        url: "https://ngspice.sourceforge.io/"
+      liberate:
+        binary: liberate
+        description: "Cadence Liberate characterization"
+        license: commercial
+        vendor: cadence
+      siliconsmart:
+        binary: siliconsmart
+        description: "Synopsys SiliconSmart characterization"
+        license: commercial
+        vendor: synopsys
+
   # ── Signoff ──────────────────────────────────────────────
   drc:
     phase: signoff
