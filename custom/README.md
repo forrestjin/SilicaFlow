@@ -11,6 +11,10 @@ custom/
 ├── technology/          — DTCO/STCO options, process corners, custom device models
 │   ├── process_options/ — Process option files and DTCO exploration configs
 │   ├── device_models/   — Custom device SPICE models (beyond standard PDK)
+│   ├── split_table_template.csv
+│   ├── split_run_template.csv
+│   ├── split_response_template.csv
+│   ├── dtco_split_table.md
 │   └── README.md
 ├── schematic/           — Custom block schematics (analog, memory, IO, custom logic)
 │   └── README.md

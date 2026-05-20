@@ -1,0 +1,8 @@
+run_id,metric_name,structure,corner,value,unit,target,decision,comment
+R002,Ion_n,IdVg_FET,TT_0p75V_25C,1180,uA_per_um,>=1150,pass,"Drive current improved versus baseline"
+R002,Ioff_n,IdVg_FET,TT_0p75V_85C,7.1,nA_per_um,<=8.0,pass,"Leakage remains within target"
+R002,RO_FO4,RO,TT_0p75V_25C,11.8,ps,<=12.0,pass,"Cell delay improved"
+R002,SRAM_read_SNM,SRAM_macro,TT_0p75V_25C,132,mV,>=135,fail,"Read margin slightly low"
+R006,Cwire_M1,RC_comb,typ,0.184,fF_per_um,<=0.190,pass,"Capacitance reduced"
+R006,EM_margin,RC_comb,125C,0.93,ratio,>=1.00,fail,"Reliability risk needs follow-up"
+

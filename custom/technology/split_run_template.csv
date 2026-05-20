@@ -1,0 +1,11 @@
+run_id,split_id,lot_id,sublot_id,wafer_ids,maskset,process_flow_rev,tcad_deck_rev,compact_model_rev,lib_rev,rcx_rev,measurement_plan,decision_gate
+R001,S00,L2401,A,W01-W06,M0,PF_3.2,TCAD_18,CM_07,LIB_04,RCX_03,"PCM+RO+SRAM","baseline_freeze"
+R002,S01,L2402,A,W01-W06,M0,PF_3.2A,TCAD_19,CM_08,LIB_05,RCX_03,"PCM+RO+SRAM","device_downselect"
+R003,S02,L2403,A,W01-W06,M0,PF_3.2B,TCAD_20,CM_09,LIB_06,RCX_03,"PCM+RO+SRAM","device_downselect"
+R004,S03,L2402,B,W07-W12,M0,PF_3.2C,TCAD_21,CM_10,LIB_07,RCX_03,"PCM+RO","mobility_review"
+R005,S04,L2404,A,W01-W12,M0,PF_3.2D,TCAD_22,CM_11,LIB_08,RCX_03,"contact_chain+RO","mol_viability"
+R006,S05,L2405,A,W01-W06,M1,PF_3.3A,TCAD_18,CM_07,LIB_09,RCX_04,"RC_comb+RO+route_block","beol_ppa_gate"
+R007,S06,L2406,A,W01-W06,M2,PF_3.3B,TCAD_18,CM_07,LIB_10,RCX_05,"RC_comb+route_block","routing_feasibility"
+R008,S07,L2407,A,W01-W06,M0,PF_3.2E,TCAD_23,CM_12,LIB_05,RCX_03,"SRAM_only","sram_margin_gate"
+R009,S08,L2404,B,W13-W18,M0,PF_3.2F,TCAD_24,CM_13,LIB_11,RCX_03,"PCM+RO+leakage","thermal_split_review"
+

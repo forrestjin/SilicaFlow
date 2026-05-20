@@ -25,6 +25,9 @@ into the digital flow as hard macros (Liberty timing models + LEF abstracts + GD
 ## Owned Artifacts
 
 - `custom/technology/` — DTCO/STCO configs, process options, custom device models
+- `custom/technology/split_table_template.csv` — DTCO factor-definition split manifest
+- `custom/technology/split_run_template.csv` — DTCO run assignment and traceability
+- `custom/technology/split_response_template.csv` — DTCO measured responses and decisions
 - `custom/schematic/` — CDL netlists, SPICE netlists, behavioral Verilog models
 - `custom/layout/` — GDS, LEF abstracts, Magic .mag files
 - `custom/simulation/` — SPICE testbenches, PVT corner definitions

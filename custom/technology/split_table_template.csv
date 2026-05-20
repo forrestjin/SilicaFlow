@@ -1,0 +1,11 @@
+split_id,parent_split,module,factor_name,factor_level,unit,change_granularity,baseline_value,hypothesis,structures,models_to_refresh,design_targets,success_metrics,owner,status
+S00,,FEOL,BASELINE,baseline,,lot,,Reference process,"IdVg_FET,RO,SRAM,contact_chain,RC_comb","tcad,spice,lib,rcx","stdcell,sram,core_block","Ion,Ioff,Vt,Rsd,RO_FO4,SNM,leakage,PPA",PI,active
+S01,S00,FEOL,spacer_thickness,4.5,nm,lot,5.0,"Reduce parasitic capacitance; monitor short-channel effects","IdVg_FET,RO,SRAM","tcad,spice,lib","stdcell,sram","Ion,Ioff,DIBL,Cgg,RO_FO4,SNM",PI,planned
+S02,S00,FEOL,spacer_thickness,5.5,nm,lot,5.0,"Improve leakage and SCE control; may hurt drive current","IdVg_FET,RO,SRAM","tcad,spice,lib","stdcell,sram","Ion,Ioff,DIBL,Cgg,RO_FO4,SNM",PI,planned
+S03,S00,FEOL,epi_stressor_Ge,28,percent,sublot,24,"Boost PMOS mobility; monitor variability and leakage","IdVg_FET,RO","tcad,spice,lib","stdcell,core_block","Idsat,Vt_sigma,RO_FO4,leakage",PI,planned
+S04,S00,MOL,contact_cd,17,nm,wafer,19,"Lower contact resistance; monitor variability and yield risk","contact_chain,RO","tcad,spice,lib","stdcell,core_block","Rcontact,RO_FO4,IR_drop_proxy",PI,planned
+S05,S00,BEOL,lowk_k,2.35,,lot,2.55,"Reduce wire capacitance; watch reliability and integration margin","RC_comb,RO","rcx,lib","core_block,top_block","Cwire,net_delay,dyn_power,EM_margin",BEOL,planned
+S06,S00,BEOL,m1_pitch,23,nm,lot,24,"Improve density; monitor wire resistance and routing pressure","RC_comb,route_testchip","rcx,lib,techfile","stdcell,core_block","Rwire,Cwire,routeability,block_PPA",BEOL,planned
+S07,S00,SRAM,fin_or_sheet_width,18,nm,lot,20,"Improve density; monitor SRAM read stability and leakage","SRAM_macro","tcad,spice,sram_char","sram","read_SNM,write_margin,leakage,access_time",SRAM,planned
+S08,S00,THERMAL,spike_anneal_temp,1035,C,wafer,1015,"Improve activation; monitor junction leakage and variability","IdVg_FET,contact_chain,RO","tcad,spice,lib","stdcell,core_block","Rsd,Ioff,RO_FO4",PI,planned
+
