@@ -8,7 +8,7 @@ Owns DFT intent and insertion coordination, ATPG pattern generation, ATE program
 - `silicon_test/atpg/` — ATPG patterns, fault coverage reports
 - `silicon_test/bringup/` — bring-up checklist, debug logs, first-silicon notes
 - `silicon_test/characterization/` — Vmin/Fmax/power characterization data
-- `silicon_test/yield_reliability/` — yield trending, reliability screening results
+- `silicon_test/yield_reliability/` — wafer sort binning, yield trending, sort-to-final-test correlation, reliability screening results
 - `silicon_test/fa/` — failure analysis reports and physical debug records
 
 ## Owned Stages
@@ -39,6 +39,7 @@ Owns DFT intent and insertion coordination, ATPG pattern generation, ATE program
 - Bring-up checklist complete — all functional blocks alive
 - Characterization data within datasheet spec
 - Yield meets production target (or root-cause plan exists)
+- Wafer-sort binning policy is versioned and correlated with final-test fallout
 
 ## Escalation
 - DFT coverage shortfall → escalate to Design agent for testability improvement

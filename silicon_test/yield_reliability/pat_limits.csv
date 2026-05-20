@@ -1,0 +1,7 @@
+parameter_name,test_step,unit,temp_c,vdd_v,datasheet_min,datasheet_max,internal_screen_min,internal_screen_max,pat_method,sample_basis,action_on_violation,owner,notes
+IDDQ_STANDBY,wafer_sort,uA,25,0.80,0,25,0,18,part_average_test,last_3_lots_and_current_lot,hold_and_review,Yield Engineering,Example leakage screen tighter than datasheet
+I_LEAK_SLEEP,wafer_sort,uA,85,0.80,0,40,0,28,part_average_test,last_3_lots_and_current_lot,hold_and_review,Yield Engineering,Use product-appropriate temperature corner
+VMIN_SCAN_800MHZ,wafer_sort,mV,25,0.80,720,9999,735,9999,electrical_distribution_assessment,last_3_lots_and_current_lot,investigate_bin_shift,Test Engineering,Example minimum-voltage screen
+FMAX_AT_NOMINAL,final_test,MHz,25,0.80,1200,9999,1250,9999,grade_screen,current_lot_and_correlation_window,downgrade_or_hold,Product Engineering,Use only if speed binning is released
+ICC_ACTIVE_TESTMODE,wafer_sort,mA,25,0.80,0,180,0,160,part_average_test,last_3_lots_and_current_lot,hold_and_review,Yield Engineering,Watch for tester and pattern sensitivity
+ANALOG_TRIM_CODE,wafer_sort,code,25,1.80,10,245,16,239,outlier_screen,current_lot,hold_and_review,Test Engineering,Representative analog trim distribution screen

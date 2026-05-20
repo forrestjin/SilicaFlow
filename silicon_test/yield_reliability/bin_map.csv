@@ -1,0 +1,14 @@
+soft_bin_number,soft_bin_name,soft_bin_intent,soft_bin_pass_fail,hard_bin_number,hard_bin_name,hard_bin_disposition,reprobe_allowed,sku_or_grade,kgd_eligible,root_cause_class,owner,notes
+1,PASS_STD,nominal commercial pass,pass,1,PACKAGE_STD,package,false,STD,true,good_die,Product Engineering,Nominal released bin for standard product
+2,PASS_SPEED_A,high performance pass,pass,2,PACKAGE_SPEED_A,package,false,SPEED_A,true,speed_grade,Product Engineering,Requires validated frequency margin
+3,PASS_LOW_LEAK,low leakage premium pass,pass,3,PACKAGE_LOW_LEAK,package,false,LOW_LEAK,true,power_grade,Product Engineering,Requires approved leakage criteria
+4,PASS_REPAIRED_MBIST,memory repaired pass,pass,4,PACKAGE_REPAIRED,package,false,STD_REPAIRED,false,memory_repair,Product Engineering,Track separately if repaired die are customer-visible
+10,CONTACT_SUSPECT,probe contact anomaly suspected,fail,90,REPROBE,reprobe,true,,false,contact,Test Engineering,Eligible for one controlled reprobe only
+20,SCAN_FAIL,repeatable scan or ATPG fail,fail,91,SCRAP_SCAN,scrap,false,,false,logic_test,Test Engineering,Not reprobe-eligible unless explicit debug hold
+21,TRANSITION_FAIL,repeatable at-speed fail,fail,91,SCRAP_SCAN,scrap,false,,false,timing_test,Test Engineering,Separate from stuck-at for diagnosis clarity
+30,MBIST_REPAIR_EXHAUSTED,memory repair budget exhausted,fail,92,SCRAP_MEMORY,scrap,false,,false,memory_test,DFT/Memory Engineering,Preserve for yield-learning analysis
+40,IDDQ_OUTLIER,parametric leakage outlier,fail,93,HOLD_PARAM,hold,false,,false,parametric,Yield Engineering,Review against PAT and abnormality criteria
+50,ANALOG_TRIM_OOR,analog trim out of range,fail,94,HOLD_ANALOG,hold,false,,false,analog_test,Test Engineering,Disposition may split by product family
+60,ENG_HOLD_DEBUG,engineering debug hold,fail,95,ENG_HOLD,hold,false,,false,engineering_hold,Product Engineering,Manual release required
+70,KGD_CANDIDATE,enhanced screened die for KGD flow,pass,5,KGD_HOLD,hold,false,KGD,true,kgd_screening,Product Engineering,Release only after KGD-specific checks
+

@@ -347,3 +347,7 @@ AI agent use:
 - compare characterization results across lots, corners, or tester revisions
 - turn lab notes into structured issue trackers and retest plans
 - generate FA intake packages and cross-link them to design changes
+
+Detailed note:
+
+- [Wafer Binning In ASIC Silicon Test](silicon_test/wafer_binning.md)

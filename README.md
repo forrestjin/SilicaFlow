@@ -181,6 +181,7 @@ See `agents/roles/` for detailed role definitions with handoff protocols.
 - [Flow Overview](docs/flow.md) — methodology and source separation
 - [Lifecycle Layers](docs/lifecycle-layers.md) — detailed layer documentation
 - [Toolchain Matrix](docs/toolchain-matrix.md) — tool capabilities and status
+- [Wafer Binning](docs/silicon_test/wafer_binning.md) — theory and standard ASIC practice for wafer sort disposition
 - [Gate Checklists](docs/gates/) — review checklists for each milestone gate
 - [Agent Contract](AGENTS.md) — operating rules for AI agents
 - [Critique & Plan](docs/CRITIQUE_AND_PLAN.md) — repository audit and improvement roadmap
