@@ -19,6 +19,8 @@ custom/
 ├── schematic/           — Custom block schematics (analog, memory, IO, custom logic)
 │   └── README.md
 ├── layout/              — Custom layout databases (GDS, OA, LEF/DEF for hard macros)
+│   ├── testline_design.md
+│   ├── testline_content_template.csv
 │   └── README.md
 ├── simulation/          — Circuit-level simulation configs and stimulus
 │   ├── testbenches/     — SPICE testbenches

@@ -23,6 +23,7 @@ Owns synthesis, static timing analysis, place-and-route, power analysis, logic e
 ### Receives From
 - **Design Agent**: clean RTL, SDC constraints, UPF power intent
 - **Architecture Agent**: PPA budgets, timing targets, area targets
+- **Custom Design Agent**: hard macros, seal-ring constraints, testline or scribe-line monitor requirements
 - **CAD Agent**: tool wrappers, flow infrastructure
 
 ### Delivers To
@@ -52,4 +53,4 @@ Owns synthesis, static timing analysis, place-and-route, power analysis, logic e
 
 ## Gate Involvement
 - **G3 (synth_handoff)**: primary owner — synthesis QoR must meet budgets
-- **G4 (tapeout)**: primary owner — all signoff checks must pass
+- **G4 (tapeout)**: primary owner — all signoff checks must pass, including seal-ring and testline release review

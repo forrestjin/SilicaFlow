@@ -171,13 +171,15 @@ Major steps:
 1. Floorplanning and device placement.
 2. Manual routing of critical paths (matching, shielding, symmetry).
 3. Power grid and guard ring construction.
-4. Density fill and antenna fix.
-5. GDS and LEF abstract export.
+4. Testline, seal-ring, or scribe-line monitor content definition where applicable.
+5. Density fill and antenna fix.
+6. GDS and LEF abstract export.
 
 Typical artifacts:
 
 - GDS II layout databases
 - LEF abstracts for digital PnR integration
+- testline or scribe-line content manifests for tapeout monitors
 - layout review checklists
 
 #### 3b.5 Custom Physical Verification (DRC, LVS)

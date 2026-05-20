@@ -29,7 +29,7 @@ into the digital flow as hard macros (Liberty timing models + LEF abstracts + GD
 - `custom/technology/split_run_template.csv` — DTCO run assignment and traceability
 - `custom/technology/split_response_template.csv` — DTCO measured responses and decisions
 - `custom/schematic/` — CDL netlists, SPICE netlists, behavioral Verilog models
-- `custom/layout/` — GDS, LEF abstracts, Magic .mag files
+- `custom/layout/` — GDS, LEF abstracts, Magic .mag files, testline content plans
 - `custom/simulation/` — SPICE testbenches, PVT corner definitions
 - `custom/characterization/` — Liberty models, extraction configs, char templates
 
@@ -79,6 +79,7 @@ make custom             # Run all custom stages
 3. **Liberty model vs SPICE mismatch** → Re-extract parasitics, re-characterize, check extraction settings
 4. **DTCO/STCO tradeoffs** → Escalate to Architecture agent with options and PPA impact analysis
 5. **Process option changes** → Escalate to human — may require G1 (spec_freeze) re-review
+6. **Testline content conflicts with seal-ring, probing, or consumer needs** → Escalate to Physical and Silicon Test agents before G4
 
 ## Anti-Patterns
 
