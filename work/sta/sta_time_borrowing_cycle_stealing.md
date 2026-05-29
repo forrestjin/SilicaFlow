@@ -3,7 +3,7 @@ title: STA Time Borrowing and Cycle Stealing
 status: reference
 owner: SilicaFlow
 scope: STA signoff, latch timing, flip-flop timing
-last_updated: 2026-05-26
+last_updated: 2026-05-29
 ---
 
 # STA Time Borrowing and Cycle Stealing
@@ -31,6 +31,8 @@ For a setup-critical path such as `Latch A -> Logic AB -> Latch B`, the borrow i
 
 Static and dynamic latches use the same high-level STA borrowing model, but dynamic latches require stricter signoff because their internal state may depend on charge retention, noise margin, clock pulse quality, and transistor-level circuit behavior.
 
+For dynamic latches, STA setup slack obtained by borrowing beyond the characterized dynamic safe window is not valid signoff slack. Lowering the clock frequency may recover a pure setup/Fmax issue, but it must be re-signed off or silicon-characterized at the lower speed because dynamic-node retention, pulse constraints, hold timing, and race-through behavior may become the limiting checks.
+
 ---
 
 ## 2. Key definitions
@@ -46,6 +48,11 @@ Static and dynamic latches use the same high-level STA borrowing model, but dyna
 | Useful skew | Intentional or beneficial clock skew that gives one stage more time and another stage less time. Similar effect, different mechanism. |
 | Multicycle path | A path architecturally allowed to take more than one clock cycle. Not the same as borrowing. |
 | Pulsed latch | A latch that is transparent only during a short pulse. It may allow limited borrowing depending on pulse width and STA modeling. |
+| Static latch | A latch whose state is held by static feedback while power is present. |
+| Dynamic latch | A latch whose state may be stored on a capacitance or dynamic node for some time. It may require retention, pulse-width, noise, and circuit-level checks beyond ordinary STA setup. |
+| Dynamic borrow cap | The maximum borrow that a dynamic latch is characterized and approved to support across signoff conditions. |
+| Over-borrow | A condition where actual latch borrow exceeds the approved borrow cap, or where STA uses an uncharacterized part of the latch transparent window. |
+| Speed derating | Qualifying the design at a lower frequency than the original target. This is valid only after the lower-speed operating point is rechecked. |
 
 ---
 
@@ -158,159 +165,7 @@ No extra time is created. Stage 2 must still meet timing with the reduced budget
 
 ---
 
-## 6. Borrow location in an A -> B -> C latch chain
-
-For this latch pipeline:
-
-```text
-Latch A -> Logic AB -> Latch B -> Logic BC -> Latch C
-```
-
-if the setup-critical path is:
-
-```text
-Latch A -> Logic AB -> Latch B
-```
-
-the path borrows at **Latch B**, not at Latch A.
-
-The reason is that B is the receiving latch. If data from A arrives after B opens but before B closes safely, B's transparent window accepts that late data.
-
-```text
-time ---->
-
-Latch B transparent window:
-
-        B opens                         B closes
-          |--------------------------------|
-          ^                                ^
-          nominal boundary                 hard setup boundary
-
-Late A -> B data:
-          |--------------------------------|
-                         ^
-                         data arrives during B transparency
-```
-
-### Physical view
-
-The borrow is physically enabled by the capture latch:
-
-```text
-A -> B borrows at Latch B.
-```
-
-Latch A influences the launch time, launch clock-to-Q behavior, and any previous-stage borrow into A, but it is not where the `A -> B` path gets its receiving-side borrow allowance.
-
-### Budget view
-
-Although the physical borrow point is B, the cost is paid by the next stage:
-
-```text
-A -> B gets more available time.
-B -> C gets less available time.
-```
-
-So the most precise wording is:
-
-```text
-A -> B borrows through Latch B from the available timing slack of B -> C.
-```
-
-### Which latch determines the allowed value?
-
-The immediate physical borrow limit is calculated against **Latch B**, because B supplies the transparent window:
-
-```text
-latest_safe_arrival_at_B =
-    B_closing_edge
-  - setup_time_of_B
-  - clock_uncertainty_to_B
-  - variation_margin
-  - duty_cycle_or_skew_margin
-  - signoff_guardband
-```
-
-The actual borrow for `A -> B` can be estimated as:
-
-```text
-actual_borrow_A_to_B =
-    max(0, arrival_time_at_B - nominal_no_borrow_boundary_at_B)
-```
-
-For a simple two-phase latch scheme, the nominal no-borrow boundary is often B's opening edge. Then:
-
-```text
-physical_borrow_limit_at_B ~= 
-    B_closing_edge
-  - B_opening_edge
-  - setup_time_of_B
-  - clock_uncertainty_to_B
-  - variation_margin
-  - duty_cycle_or_skew_margin
-  - signoff_guardband
-```
-
-However, B alone is not enough. The final safe value must also account for downstream timing into C:
-
-```text
-safe_borrow_A_to_B =
-  min(
-      physical_borrow_limit_at_B,
-      downstream_slack_B_to_C - residual_margin
-  )
-```
-
-Useful rule:
-
-```text
-B determines how much A -> B can physically borrow.
-C determines whether the downstream stage can survive that borrow.
-```
-
-### Example
-
-```text
-Latch B opens at              500 ps
-Latch B closes at            1000 ps
-Latch B setup                  30 ps
-Clock uncertainty / margin     50 ps
-```
-
-The latest safe arrival at B is:
-
-```text
-1000 - 30 - 50 = 920 ps
-```
-
-If the no-borrow boundary is B opening at 500 ps:
-
-```text
-physical_borrow_limit_at_B = 920 - 500 = 420 ps
-```
-
-If data from A arrives at B at 620 ps:
-
-```text
-actual_borrow_A_to_B = 620 - 500 = 120 ps
-```
-
-That is physically legal against B's window, but the next stage now has 120 ps less timing budget:
-
-```text
-B -> C loses 120 ps of available time.
-```
-
-Therefore, an STA signoff check should verify both:
-
-```text
-actual_borrow_A_to_B <= borrow_cap_at_B
-setup_slack_B_to_C_after_borrow >= required_margin
-```
-
----
-
-## 7. Maximum safe borrow
+## 6. Maximum safe borrow
 
 The maximum signoff-safe borrow is the smaller of:
 
@@ -378,93 +233,334 @@ In this example, 385 ps is the physical window limit, but 220 ps is the safer si
 
 ---
 
-## 8. Static versus dynamic latch treatment
 
-The high-level STA borrowing model is the same for static and dynamic latches:
+## 7. Borrow location in an A -> B -> C latch chain
+
+For this latch pipeline:
 
 ```text
-A -> B borrows at the capture latch B.
-B -> C pays the downstream timing cost.
+Latch A -> Logic AB -> Latch B -> Logic BC -> Latch C
 ```
 
-The difference is signoff confidence and required guardband.
-
-A **static latch** stores its state with a feedback structure. Once captured, the stored value is actively regenerated as long as power is valid.
-
-A **dynamic latch** stores state on a capacitance or soft internal node. Its correctness may depend on charge retention, leakage, charge sharing, clock feedthrough, capacitive coupling, supply noise, and keeper strength. Therefore, a dynamic latch should generally receive a tighter borrow policy unless the library or circuit team explicitly characterized and approved the full borrow window.
-
-### Static latch policy
-
-For a normal static latch, this policy is usually sufficient if the Liberty model and MMMC setup are complete:
+if the setup-critical path is:
 
 ```text
-actual_borrow <= borrow_cap_at_capture_latch
-setup_slack >= required_setup_margin
-hold_slack >= required_hold_margin
-min_pulse_width_slack >= 0
-no transparent race-through
-no invalid phase overlap
+Latch A -> Logic AB -> Latch B
 ```
 
-A practical static-latch cap is:
+the path borrows at **Latch B**, not at Latch A.
+
+The reason is that B is the receiving latch. If data from A arrives after B opens but before B closes safely, B's transparent window accepts that late data.
 
 ```text
-borrow_cap_static(L) =
-    min_physical_borrow_window_across_scenarios(L)
-  - standard_latch_guardband
+time ---->
+
+Latch B transparent window:
+
+        B opens                         B closes
+          |--------------------------------|
+          ^                                ^
+          nominal boundary                 hard setup boundary
+
+Late A -> B data:
+          |--------------------------------|
+                         ^
+                         data arrives during B transparency
 ```
 
-### Dynamic latch policy
+### Physical view
 
-For a dynamic latch, use the same STA setup equation, but add dynamic-node validity limits:
+The borrow is physically enabled by the capture latch:
 
 ```text
-borrow_cap_dynamic(L) =
+A -> B borrows at Latch B.
+```
+
+Latch A influences launch time, launch clock-to-Q behavior, and any previous-stage borrow into A. It is not where the `A -> B` path gets its receiving-side borrow allowance.
+
+### Budget view
+
+Although the physical borrow point is B, the cost is paid by the next stage:
+
+```text
+A -> B gets more available time.
+B -> C gets less available time.
+```
+
+The precise wording is:
+
+```text
+A -> B borrows through Latch B from the available timing slack of B -> C.
+```
+
+### Which latch determines the allowed value?
+
+The immediate physical borrow limit is calculated against **Latch B**, because B supplies the transparent window:
+
+```text
+latest_safe_arrival_at_B =
+    B_closing_edge
+  - setup_time_of_B
+  - clock_uncertainty_to_B
+  - variation_margin
+  - duty_cycle_or_skew_margin
+  - signoff_guardband
+```
+
+The actual borrow for `A -> B` can be estimated as:
+
+```text
+actual_borrow_A_to_B =
+    max(0, arrival_time_at_B - nominal_no_borrow_boundary_at_B)
+```
+
+For a simple two-phase latch scheme, the nominal no-borrow boundary is often B's opening edge. Then:
+
+```text
+physical_borrow_limit_at_B ~= 
+    B_closing_edge
+  - B_opening_edge
+  - setup_time_of_B
+  - clock_uncertainty_to_B
+  - variation_margin
+  - duty_cycle_or_skew_margin
+  - signoff_guardband
+```
+
+However, B alone is not enough. The final safe value must also account for downstream timing into C:
+
+```text
+safe_borrow_A_to_B =
   min(
-      min_physical_borrow_window_across_scenarios(L),
-      characterized_dynamic_safe_window(L),
-      retention_safe_window(L),
-      valid_write_or_evaluate_window(L),
-      downstream_slack_limit(L)
-  ) - dynamic_latch_guardband
+      physical_borrow_limit_at_B,
+      downstream_slack_B_to_C - residual_margin
+  )
 ```
 
-Additional checks for dynamic latches should include:
+Use this mental model:
 
 ```text
-max clock-off time / retention time
-minimum clock frequency, if required
-minimum clock pulse width
-maximum clock pulse width or evaluate time, if specified
-write/evaluate window validity
-charge sharing margin
-keeper strength margin
-clock feedthrough / charge injection sensitivity
-coupling and noise margin
-SI and IR-drop scenarios
-transistor-level SPICE validation for custom dynamic cells
-```
-
-Do not assume that a dynamic latch can safely use the same borrow budget as a static latch merely because STA reports positive setup slack. The STA model must be backed by valid cell characterization, clock pulse constraints, and, for custom dynamic circuits, transistor-level validation.
-
-Recommended classification:
-
-```text
-Library static latch:
-  Normal latch-borrow STA signoff plus project guardband.
-
-Library dynamic or pulsed latch:
-  Allow borrow only inside the characterized window and pulse constraints.
-
-Custom dynamic latch or dynamic pipeline stage:
-  Use STA for budgeting, but require SPICE/circuit-team approval for the borrow cap.
+B decides how much can physically be borrowed.
+C decides whether the next stage can afford that borrow.
 ```
 
 ---
 
-## 9. Flip-flop versus latch borrowing
+## 8. Static versus dynamic latch treatment
 
-### 9.1 Normal edge-triggered flip-flop
+The STA abstraction is similar for static and dynamic latches:
+
+```text
+A -> B borrows at capture Latch B.
+B -> C pays for the borrow through reduced downstream budget.
+```
+
+The signoff risk is different.
+
+A **static latch** holds its state through static feedback. As long as power, setup, hold, pulse-width, and noise assumptions are satisfied, its storage mechanism is robust.
+
+A **dynamic latch** may store state as charge on an internal node. That makes the timing window partly circuit-dependent. Even if a pure STA setup equation appears legal, the real latch may also need margin for:
+
+```text
+internal write/evaluate completion
+charge sharing
+keeper contention
+clock feedthrough or injection
+coupling noise
+local IR drop
+leakage and retention time
+minimum operating frequency or maximum clock-off time
+clock pulse width and duty-cycle distortion
+```
+
+For a static latch, a typical signoff cap is:
+
+```text
+static_borrow_cap =
+    min_physical_borrow_across_scenarios
+  - standard_latch_guardband
+```
+
+For a dynamic latch, use a stricter cap:
+
+```text
+dynamic_borrow_cap =
+  min(
+      STA_physical_borrow_window,
+      characterized_dynamic_safe_window,
+      retention_safe_window,
+      write_or_evaluate_safe_window,
+      downstream_slack_limit
+  )
+  - dynamic_latch_guardband
+```
+
+Practical policy:
+
+```text
+Static latch:
+  Sign off with normal latch-borrow STA checks plus project guardband.
+
+Library dynamic or pulsed latch:
+  Allow borrow only inside the characterized Liberty/circuit validity window.
+
+Custom dynamic latch:
+  Do not rely on STA alone. Require transistor-level validation across PVT,
+  mismatch, clock slew, data slew, SI/noise, and IR-drop scenarios.
+```
+
+Do not give a dynamic latch the same borrow budget as a static latch unless the library or circuit team has explicitly characterized and approved that window.
+
+---
+
+## 9. Dynamic latch over-borrowing impact and remedy
+
+Dynamic-latch over-borrow occurs when:
+
+```text
+actual_borrow_at_dynamic_latch > dynamic_borrow_cap
+```
+
+or when STA is allowed to use a region of the latch transparent window that has not been characterized or approved by the library/circuit team.
+
+### Signoff interpretation
+
+Treat this as a **hard signoff failure**, even if the STA report shows positive setup slack.
+
+```text
+STA setup slack created by over-borrowing a dynamic latch is not valid signoff slack.
+```
+
+The timing report may be mathematically consistent, but the circuit is being used outside its guaranteed operating window.
+
+### What chip failure means here
+
+In this context, chip failure does not necessarily mean the chip is physically damaged or that every die is dead. It means the design can produce an incorrect logical state under some condition.
+
+Examples:
+
+```text
+expected captured D = 1, actual captured Q = 0
+expected captured D = 0, actual captured Q = 1
+internal dynamic node is weakly resolved and later disturbed by noise
+```
+
+Possible silicon symptoms include:
+
+```text
+BIST failure
+scan failure
+random functional error
+frequency shmoo failure
+Vmin failure
+temperature-sensitive failure
+pattern-sensitive failure
+yield loss
+field escape risk
+```
+
+This is often worse than a clean deterministic failure because the chip may work at nominal lab conditions but fail at slow process, low voltage, high temperature, local IR drop, bad clock duty cycle, crosstalk, aging, or specific data patterns.
+
+### Can lower speed fix it?
+
+Lower frequency can help if the problem is purely a setup/Fmax issue:
+
+```text
+At high frequency:
+  required borrow > dynamic_borrow_cap
+
+At lower frequency:
+  required borrow <= dynamic_borrow_cap
+```
+
+In that case the chip may be qualified at a lower frequency, but only after the lower-speed operating point is re-signed off or silicon-characterized.
+
+Do not assume slower is always safer for dynamic latches. A dynamic node may also have a retention or maximum-period constraint:
+
+```text
+slowing down helps setup
+slowing down can hurt dynamic-node retention
+```
+
+A lower-speed qualification must prove:
+
+```text
+actual_borrow_at_dynamic_latch <= dynamic_borrow_cap
+setup_slack >= required_setup_margin
+hold_slack >= required_hold_margin
+min_pulse_width_slack >= 0
+max_pulse_width_or_max_period_check passes, if required
+minimum_frequency_or_retention_check passes, if required
+no race-through or phase-overlap issue
+SI, IR, OCV/POCV/LVF, aging, and duty-cycle checks remain clean
+```
+
+Safe statement:
+
+```text
+The chip may be usable at a lower frequency only if the lower-frequency point is
+requalified and all dynamic-latch validity checks pass.
+```
+
+Unsafe statement:
+
+```text
+The chip over-borrowed at target frequency, so we can always fix it by lowering
+the clock.
+```
+
+### Remedy options
+
+Preferred fixes are design or constraint fixes that bring actual borrow back inside the approved cap:
+
+```text
+reduce A -> B datapath delay
+rebalance logic from A -> B into B -> C if B -> C has slack
+retime the pipeline
+adjust latch phase only after hold, race-through, and pulse checks remain clean
+tighten set_max_time_borrow to the real dynamic cap and fix resulting violations
+change the dynamic latch to a static latch if area, power, and timing allow
+increase or redesign dynamic-latch robustness if this is a custom latch
+recharacterize the latch if the circuit team wants to approve a larger window
+qualify a lower Fmax bin only after complete lower-speed signoff
+```
+
+For custom or high-speed dynamic latches, require circuit validation for any cap expansion:
+
+```text
+SPICE across PVT
+Monte Carlo or mismatch validation
+clock slew and data slew sweeps
+pulse-width and duty-cycle sweeps
+local IR-drop cases
+coupling/noise injection cases
+keeper contention cases
+charge-sharing cases
+retention and clock-off-time cases
+```
+
+SilicaFlow status policy for dynamic over-borrow:
+
+```text
+PASS:
+  actual_borrow <= dynamic_borrow_cap
+  all setup, hold, pulse, race, retention, SI/IR, and variation checks pass
+
+WARN:
+  actual_borrow is close to dynamic_borrow_cap
+  dynamic margin is small or sensitive to PVT/noise/pulse width
+
+FAIL:
+  actual_borrow > dynamic_borrow_cap
+  dynamic_borrow_cap is unknown or uncharacterized
+  lower-speed operation is assumed but not requalified
+```
+
+---
+
+## 10. Flip-flop versus latch borrowing
+
+### 10.1 Normal edge-triggered flip-flop
 
 A normal flip-flop cannot perform true timing borrowing.
 
@@ -482,7 +578,7 @@ arrival_time <= capture_edge - setup - uncertainty
 
 If data arrives after the capture edge, the flop does not borrow from the next cycle. It misses that edge and will be captured later, which is a setup violation unless the design intentionally defines the path as multicycle.
 
-### 9.2 Level-sensitive latch
+### 10.2 Level-sensitive latch
 
 A latch can borrow because it has a transparent window:
 
@@ -493,7 +589,7 @@ Data may arrive after Latch B opens,
 as long as it arrives before Latch B closes safely.
 ```
 
-### 9.3 Pulsed latch or pulsed flip-flop
+### 10.3 Pulsed latch or pulsed flip-flop
 
 A pulsed latch is latch-like during a short pulse:
 
@@ -507,9 +603,9 @@ It may allow limited borrowing, usually bounded by pulse width. Signoff must che
 
 ---
 
-## 10. Similar concepts that are not true latch borrowing
+## 11. Similar concepts that are not true latch borrowing
 
-### 10.1 Useful skew
+### 11.1 Useful skew
 
 Useful skew can move a flip-flop capture edge later to give the previous stage more time:
 
@@ -526,7 +622,7 @@ Logic 2 gets less time.
 
 This resembles borrowing as slack redistribution, but the mechanism is different. FF B still captures on one edge.
 
-### 10.2 Multicycle path
+### 11.2 Multicycle path
 
 A multicycle path allows data to be captured after more than one clock cycle:
 
@@ -539,13 +635,13 @@ This is not borrowing. It is only valid if the architecture and control protocol
 
 A multicycle exception must not be used merely to hide a setup violation.
 
-### 10.3 Retiming
+### 11.3 Retiming
 
 Retiming changes the placement of sequential elements to rebalance logic delay across stages. It changes the circuit structure. Borrowing does not change the structure; it uses latch transparency.
 
 ---
 
-## 11. Signoff acceptance criteria
+## 12. Signoff acceptance criteria
 
 A latch-borrowed timing path should be accepted only if all of the following pass across all signoff scenarios:
 
@@ -554,6 +650,8 @@ actual_borrow <= allowed_borrow_cap
 setup_slack >= required_setup_margin
 hold_slack >= required_hold_margin
 min_pulse_width_slack >= 0
+dynamic_latch_borrow <= characterized_dynamic_borrow_cap, if applicable
+dynamic retention / max-period / min-frequency checks pass, if applicable
 no transparent race-through
 no invalid borrowing across asynchronous or unrelated clocks
 no unintended latch inference
@@ -577,16 +675,19 @@ OCV/AOCV/POCV/LVF variation models, if used
 
 ---
 
-## 12. Recommended borrow policy
+## 13. Recommended borrow policy
 
 A practical policy is:
 
 ```text
 Hard fail:
   actual_borrow > borrow_cap
+  dynamic_latch_borrow > characterized_dynamic_borrow_cap
+  dynamic_borrow_cap is unknown for a dynamic latch that needs borrowing
   setup slack < required setup margin
   hold slack < required hold margin
   min pulse width violation
+  dynamic retention / max-period / min-frequency violation
   borrow on unintended latch
   borrow across asynchronous clocks
   transparent race-through risk
@@ -612,9 +713,11 @@ borrow_cap = min(B_physical, S_next - M_residual)
 
 Do not sign off by assuming that half-cycle equals safe borrow. Half-cycle is only the ideal latch-open duration. The real safe value must subtract setup, uncertainty, skew, duty-cycle distortion, variation, SI/IR/aging effects, and project guardband.
 
+For dynamic latches, positive STA slack is not sufficient if it was achieved by using borrow beyond the characterized dynamic cap. Over-borrow is a hard failure until the design is fixed, the latch is recharacterized, or a lower-speed operating point is fully requalified.
+
 ---
 
-## 13. STA constraint guidance
+## 14. STA constraint guidance
 
 Many STA and implementation tools support a maximum time-borrow constraint. Exact syntax depends on the tool.
 
@@ -637,7 +740,7 @@ Avoid forcing exact borrow values unless the methodology explicitly requires it.
 
 ---
 
-## 14. Race-through risk
+## 15. Race-through risk
 
 Latch transparency can create race-through if multiple latch stages are transparent at the same time or if clock phases overlap unexpectedly.
 
@@ -663,7 +766,7 @@ no unintended phase overlap
 
 ---
 
-## 15. SilicaFlow integration checklist
+## 16. SilicaFlow integration checklist
 
 Suggested location inside the project:
 
@@ -689,13 +792,18 @@ Suggested review hooks for SilicaFlow timing signoff reports:
 1. Report actual borrow per latch.
 2. Report maximum allowed borrow per latch.
 3. Report borrow ratio = actual_borrow / physical_borrow_window.
-4. Flag borrow ratio above policy threshold, for example 0.70 or 0.80.
-5. Report downstream slack after borrow.
-6. Report hold slack on corresponding min-delay paths.
-7. Report min pulse width slack.
-8. Report latch phase overlap or transparent race-through risk.
-9. Fail unintended latches or latches outside the approved clocking scheme.
-10. Block signoff if any latch borrow is unconstrained or not covered by MMMC signoff.
+4. Report latch type: static, dynamic, pulsed, or unknown.
+5. Report dynamic borrow cap for dynamic latches.
+6. Flag borrow ratio above policy threshold, for example 0.70 or 0.80.
+7. Report downstream slack after borrow.
+8. Report hold slack on corresponding min-delay paths.
+9. Report min pulse width slack.
+10. Report dynamic retention, max-period, or min-frequency slack if applicable.
+11. Report latch phase overlap or transparent race-through risk.
+12. Fail unintended latches or latches outside the approved clocking scheme.
+13. Block signoff if any latch borrow is unconstrained or not covered by MMMC signoff.
+14. Block signoff if a dynamic latch uses uncharacterized borrow.
+15. Require full requalification if a lower-speed bin is used as the remedy.
 ```
 
 Example report fields:
@@ -705,15 +813,22 @@ instance_name
 clock_name
 mode
 corner
+latch_type
 open_edge_time
 close_edge_time
 physical_borrow_limit_ps
+dynamic_borrow_cap_ps
 actual_borrow_ps
 borrow_cap_ps
 borrow_ratio
 setup_slack_after_borrow_ps
+downstream_slack_ps
 hold_slack_ps
 min_pulse_width_slack_ps
+retention_slack_ps
+min_frequency_check_status
+max_period_check_status
+lower_speed_requalified
 status
 ```
 
@@ -722,6 +837,7 @@ Example status policy:
 ```text
 PASS:
   actual_borrow_ps <= borrow_cap_ps
+  dynamic latch checks pass, if applicable
   setup_slack_after_borrow_ps >= setup_margin_ps
   hold_slack_ps >= hold_margin_ps
   min_pulse_width_slack_ps >= 0
@@ -729,17 +845,21 @@ PASS:
 WARN:
   borrow_ratio >= warning_threshold
   residual_window_margin_ps is small
+  dynamic latch borrow is close to characterized cap
 
 FAIL:
   actual_borrow_ps > borrow_cap_ps
-  setup/hold/min-pulse check fails
+  dynamic_latch_borrow_ps > dynamic_borrow_cap_ps
+  dynamic_borrow_cap_ps is unknown for a borrowing dynamic latch
+  setup/hold/min-pulse/retention check fails
   transparent race-through is possible
   latch is unintended or unconstrained
+  lower-speed remedy is assumed but not requalified
 ```
 
 ---
 
-## 16. One-line rules
+## 17. One-line rules
 
 ```text
 Latch borrowing allows late data to be accepted while the receiving latch is still open.
@@ -766,16 +886,24 @@ Safe borrow is bounded by both the latch transparent window and downstream slack
 ```
 
 ```text
-For A -> B, calculate the physical borrow window at B, then verify B -> C still passes at C.
+For A -> B, borrow is physically at B; the timing cost is paid by B -> C.
 ```
 
 ```text
-Static and dynamic latches share the STA borrow abstraction, but dynamic latches need stricter circuit-validity checks.
+A dynamic latch must not borrow beyond its characterized dynamic borrow cap.
+```
+
+```text
+Lowering frequency can fix a setup/Fmax shortage only after the lower-speed point is requalified.
+```
+
+```text
+For dynamic latches, slower clocks can help setup but can hurt retention or max-period checks.
 ```
 
 ---
 
-## 17. References for methodology context
+## 18. References for methodology context
 
 The following vendor documents discuss latch timing borrowing and maximum borrow constraints. Use the project STA tool documentation as the source of truth for exact syntax and report behavior.
 
@@ -787,8 +915,4 @@ The following vendor documents discuss latch timing borrowing and maximum borrow
   - https://docs.amd.com/r/2023.2-English/ug835-vivado-tcl-commands/set_max_time_borrow
 - Synopsys PrimeTime signoff timing analysis overview
   - https://www.synopsys.com/content/dam/synopsys/implementation%26signoff/datasheets/primetime-ds.pdf
-- University of Pennsylvania VLSI lecture notes: static and dynamic latch/storage concepts
-  - https://www.seas.upenn.edu/~ese5700/spring2020/handouts/lec19_6up.pdf
-- UT Austin VLSI lecture notes: dynamic logic precharge/evaluate and noise considerations
-  - https://www.cerc.utexas.edu/~jaa/vlsi/lectures/12-1.pdf
 
