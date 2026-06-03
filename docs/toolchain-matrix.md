@@ -26,6 +26,19 @@ These layers are documented and structured in-repo, but not represented as runna
 | Package realization | bump maps, substrate layouts, SI/PI/thermal studies, assembly handoff | Cadence Integrity/Allegro packaging tools, Siemens Xpedition Package Designer, Synopsys 3DIC/package co-design tools, Ansys analysis tools |
 | Post-silicon test | DFT plans, ATPG patterns, ATE programs, bring-up logs, characterization and yield data | Siemens Tessent, Cadence Modus, Synopsys TestMAX, Teradyne/Advantest ATE, lab debug tools |
 
+## AI agents and EDA orchestration
+
+AI agents sit above the tool registry and should orchestrate bounded EDA tasks, report analysis, script generation, and workflow iteration. They do not replace signoff tools or human gate approval.
+
+See [AI Agents In Chip Design And EDA](eda-ai-agents.md) for the SilicaFlow agent-stack model and a Cadence AgentStack example.
+
+| Agent layer | Role | Example tool context |
+| --- | --- | --- |
+| Orchestrator | Decomposes objectives, assigns domain agents, tracks context, and evaluates results | SilicaFlow orchestrator, vendor head agents such as Cadence AgentStack |
+| Domain super agents | Own front-end, custom/analog, implementation/signoff, package, or test workflows | Cadence ChipStack, ViraStack, InnoStack; SilicaFlow role agents |
+| Tool agents | Interact with EDA tools, reports, logs, shell commands, and GUIs | Xcelium, Jasper, Verisium, Virtuoso, Spectre, Innovus, Tempus, Voltus, Certus |
+| Data and AI platform | Stores design data, run history, reports, knowledge, and analytics context | Cadence JedAI-like data layers; SilicaFlow `reports/`, `schemas/`, and `orchestrator/` |
+
 ## Commercial tool adapters
 
 These directories are included for repo hygiene and methodology alignment, not as validated executable templates:

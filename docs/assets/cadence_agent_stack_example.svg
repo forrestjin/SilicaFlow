@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500" role="img" aria-labelledby="title desc">
+  <title id="title">Cadence AgentStack example for chip design</title>
+  <desc id="desc">Layered example of an AI agent stack for chip design, including user intent, AgentStack orchestration, ChipStack, ViraStack, InnoStack, tool agents, JedAI data infrastructure, and Cadence EDA engines.</desc>
+  <defs>
+    <style>
+      .bg { fill: #fbfaf7; }
+      .title { font: 700 44px Helvetica, Arial, sans-serif; fill: #181818; }
+      .subtitle { font: 600 22px Helvetica, Arial, sans-serif; fill: #2443a6; }
+      .layer-title { font: 700 24px Helvetica, Arial, sans-serif; }
+      .body { font: 16px Helvetica, Arial, sans-serif; fill: #1e1e1e; }
+      .small { font: 14px Helvetica, Arial, sans-serif; fill: #242424; }
+      .tiny { font: 12px Helvetica, Arial, sans-serif; fill: #333333; }
+      .box { fill: #ffffff; stroke-width: 2.5; rx: 14; }
+      .note { fill: #ffffff; stroke-width: 2; stroke-dasharray: 8 7; rx: 12; }
+      .chip { fill: #e9f7e9; stroke: #2d8a3f; }
+      .vira { fill: #f3edff; stroke: #5940b8; }
+      .inno { fill: #fff2e6; stroke: #d46b19; }
+      .tool { fill: #eefbfb; stroke: #17888a; }
+      .data { fill: #fff7df; stroke: #cf8500; }
+      .engine { fill: #fff0f0; stroke: #c83b3b; }
+      .purple { stroke: #6d4cff; }
+      .blue { stroke: #2867d8; }
+      .green { stroke: #2d8a3f; }
+      .orange { stroke: #d46b19; }
+      .teal { stroke: #17888a; }
+      .red { stroke: #c83b3b; }
+      .arrow { fill: none; stroke: #2450d0; stroke-width: 3; marker-end: url(#arrowhead); }
+      .flow { fill: none; stroke: #2450d0; stroke-width: 3; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#2450d0"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="1500"/>
+  <text x="600" y="70" text-anchor="middle" class="title">Cadence AgentStack Example</text>
+  <text x="600" y="108" text-anchor="middle" class="subtitle">From high-level intent to signoff-oriented chip design workflows</text>
+
+  <rect x="70" y="150" width="820" height="145" class="box purple"/>
+  <text x="110" y="188" class="layer-title" fill="#4b2ccf">User Intent / Inputs</text>
+  <text x="120" y="222" class="body">- Natural-language requests, specifications, and architecture diagrams</text>
+  <text x="120" y="249" class="body">- Design goals: PPA, power, area, cost, schedule, reliability</text>
+  <text x="120" y="276" class="body">- Constraints, budgets, technology, process, and signoff requirements</text>
+  <rect x="925" y="165" width="205" height="115" class="note purple"/>
+  <text x="948" y="198" class="body" fill="#4b2ccf">Goal</text>
+  <text x="948" y="226" class="small">Convert intent into</text>
+  <text x="948" y="248" class="small">implementable, verifiable,</text>
+  <text x="948" y="270" class="small">signoff-ready work.</text>
+
+  <path d="M 480 295 L 480 340" class="arrow"/>
+
+  <rect x="70" y="340" width="820" height="160" class="box blue"/>
+  <text x="390" y="380" text-anchor="middle" class="layer-title" fill="#2450d0">AgentStack Orchestration Layer</text>
+  <text x="105" y="417" class="body">Unified head agent: task planning, subagent coordination, context management, evaluation, and iteration.</text>
+  <rect x="115" y="445" width="130" height="36" class="box blue"/>
+  <text x="180" y="468" text-anchor="middle" class="tiny">Task planning</text>
+  <rect x="265" y="445" width="150" height="36" class="box blue"/>
+  <text x="340" y="468" text-anchor="middle" class="tiny">Agent scheduling</text>
+  <rect x="435" y="445" width="150" height="36" class="box blue"/>
+  <text x="510" y="468" text-anchor="middle" class="tiny">Context memory</text>
+  <rect x="605" y="445" width="150" height="36" class="box blue"/>
+  <text x="680" y="468" text-anchor="middle" class="tiny">Result feedback</text>
+  <rect x="925" y="360" width="205" height="115" class="note blue"/>
+  <text x="948" y="392" class="body" fill="#2450d0">Role</text>
+  <text x="948" y="420" class="small">One orchestrated entry</text>
+  <text x="948" y="442" class="small">point across multi-step</text>
+  <text x="948" y="464" class="small">EDA workflows.</text>
+
+  <path d="M 480 500 L 480 548" class="arrow"/>
+
+  <rect x="70" y="550" width="820" height="335" class="box green"/>
+  <text x="480" y="590" text-anchor="middle" class="layer-title" fill="#1f7b31">Domain Super Agents</text>
+
+  <rect x="95" y="620" width="245" height="230" class="box chip"/>
+  <text x="217" y="655" text-anchor="middle" class="layer-title" fill="#207733">ChipStack</text>
+  <text x="217" y="682" text-anchor="middle" class="small">(RTL design and verification)</text>
+  <text x="120" y="720" class="small">- Requirement and architecture analysis</text>
+  <text x="120" y="745" class="small">- RTL generation and refactoring</text>
+  <text x="120" y="770" class="small">- Testbench and test-plan generation</text>
+  <text x="120" y="795" class="small">- SVA/formal/debug closure</text>
+  <text x="120" y="820" class="small">- Regression triage and fixes</text>
+  <text x="120" y="845" class="tiny">Tools: Xcelium, Verisium, Jasper</text>
+
+  <rect x="367" y="620" width="245" height="230" class="box vira"/>
+  <text x="490" y="655" text-anchor="middle" class="layer-title" fill="#4b2ccf">ViraStack</text>
+  <text x="490" y="682" text-anchor="middle" class="small">(custom and analog)</text>
+  <text x="392" y="720" class="small">- Schematic and testbench creation</text>
+  <text x="392" y="745" class="small">- Circuit optimization</text>
+  <text x="392" y="770" class="small">- IP mining and migration</text>
+  <text x="392" y="795" class="small">- Layout reuse and adaptation</text>
+  <text x="392" y="820" class="small">- Result analysis</text>
+  <text x="392" y="845" class="tiny">Tools: Virtuoso, Spectre</text>
+
+  <rect x="640" y="620" width="245" height="230" class="box inno"/>
+  <text x="762" y="655" text-anchor="middle" class="layer-title" fill="#cf5b08">InnoStack</text>
+  <text x="762" y="682" text-anchor="middle" class="small">(implementation and signoff)</text>
+  <text x="665" y="720" class="small">- Synthesis, floorplan, PnR</text>
+  <text x="665" y="745" class="small">- Constraint and PPA tuning</text>
+  <text x="665" y="770" class="small">- Timing, power, reliability analysis</text>
+  <text x="665" y="795" class="small">- ECO recognition and execution</text>
+  <text x="665" y="820" class="small">- Signoff reports and closure</text>
+  <text x="665" y="845" class="tiny">Tools: Innovus, Tempus, Voltus, Certus</text>
+
+  <rect x="925" y="655" width="205" height="150" class="note green"/>
+  <text x="948" y="688" class="body" fill="#1f7b31">Role</text>
+  <text x="948" y="716" class="small">Domain specialists</text>
+  <text x="948" y="738" class="small">own local context,</text>
+  <text x="948" y="760" class="small">tool choices, and</text>
+  <text x="948" y="782" class="small">workflow results.</text>
+
+  <path d="M 480 885 L 480 930" class="arrow"/>
+
+  <rect x="70" y="930" width="820" height="130" class="box tool"/>
+  <text x="480" y="965" text-anchor="middle" class="layer-title" fill="#147a7b">Tool Agents and Embedded Optimization AI</text>
+  <rect x="110" y="995" width="130" height="38" class="box teal"/>
+  <text x="175" y="1019" text-anchor="middle" class="tiny">RTL assistant</text>
+  <rect x="260" y="995" width="150" height="38" class="box teal"/>
+  <text x="335" y="1019" text-anchor="middle" class="tiny">Verification planner</text>
+  <rect x="430" y="995" width="130" height="38" class="box teal"/>
+  <text x="495" y="1019" text-anchor="middle" class="tiny">Debug agent</text>
+  <rect x="580" y="995" width="145" height="38" class="box teal"/>
+  <text x="652" y="1019" text-anchor="middle" class="tiny">PPA optimizer</text>
+  <rect x="745" y="995" width="105" height="38" class="box teal"/>
+  <text x="798" y="1019" text-anchor="middle" class="tiny">More...</text>
+  <rect x="925" y="940" width="205" height="105" class="note teal"/>
+  <text x="948" y="972" class="body" fill="#147a7b">Role</text>
+  <text x="948" y="1000" class="small">Use tool state, logs,</text>
+  <text x="948" y="1022" class="small">scripts, and reports.</text>
+
+  <path d="M 480 1060 L 480 1105" class="arrow"/>
+
+  <rect x="70" y="1105" width="820" height="135" class="box data"/>
+  <text x="480" y="1140" text-anchor="middle" class="layer-title" fill="#be7600">JedAI Data and AI Infrastructure</text>
+  <text x="115" y="1172" class="body">- EDA data: waveforms, coverage, layout, timing, power, reports, logs, PDK, libraries</text>
+  <text x="115" y="1198" class="body">- Workflow data: runs, scripts, IP reuse, history, analytics, notebooks, APIs</text>
+  <text x="115" y="1224" class="body">- Context, traceability, governance, security, and reusable knowledge</text>
+  <rect x="925" y="1120" width="205" height="105" class="note orange"/>
+  <text x="948" y="1152" class="body" fill="#be7600">Role</text>
+  <text x="948" y="1180" class="small">Provide memory,</text>
+  <text x="948" y="1202" class="small">data loops, and</text>
+  <text x="948" y="1224" class="small">design analytics.</text>
+
+  <path d="M 480 1240 L 480 1285" class="arrow"/>
+
+  <rect x="70" y="1285" width="820" height="135" class="box engine"/>
+  <text x="480" y="1320" text-anchor="middle" class="layer-title" fill="#b72b2b">Cadence EDA Engines</text>
+  <rect x="120" y="1348" width="100" height="34" class="box red"/><text x="170" y="1370" text-anchor="middle" class="tiny">Xcelium</text>
+  <rect x="235" y="1348" width="100" height="34" class="box red"/><text x="285" y="1370" text-anchor="middle" class="tiny">Jasper</text>
+  <rect x="350" y="1348" width="100" height="34" class="box red"/><text x="400" y="1370" text-anchor="middle" class="tiny">Verisium</text>
+  <rect x="465" y="1348" width="100" height="34" class="box red"/><text x="515" y="1370" text-anchor="middle" class="tiny">Virtuoso</text>
+  <rect x="580" y="1348" width="100" height="34" class="box red"/><text x="630" y="1370" text-anchor="middle" class="tiny">Spectre</text>
+  <rect x="695" y="1348" width="100" height="34" class="box red"/><text x="745" y="1370" text-anchor="middle" class="tiny">Innovus</text>
+  <rect x="235" y="1388" width="100" height="34" class="box red"/><text x="285" y="1410" text-anchor="middle" class="tiny">Tempus</text>
+  <rect x="350" y="1388" width="100" height="34" class="box red"/><text x="400" y="1410" text-anchor="middle" class="tiny">Voltus</text>
+  <rect x="465" y="1388" width="100" height="34" class="box red"/><text x="515" y="1410" text-anchor="middle" class="tiny">Certus</text>
+  <rect x="580" y="1388" width="100" height="34" class="box red"/><text x="630" y="1410" text-anchor="middle" class="tiny">Allegro X</text>
+  <rect x="925" y="1300" width="205" height="105" class="note red"/>
+  <text x="948" y="1332" class="body" fill="#b72b2b">Role</text>
+  <text x="948" y="1360" class="small">Trusted engines</text>
+  <text x="948" y="1382" class="small">produce physics and</text>
+  <text x="948" y="1404" class="small">signoff evidence.</text>
+</svg>
